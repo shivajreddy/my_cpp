@@ -16,6 +16,7 @@ void Move(Player& player, int x, int y) {
 int main() {
   Player player;
   player.x = 5;
+  player.y = 10;
 
   cout << "hi" << endl;
   cout << "hi" << endl;

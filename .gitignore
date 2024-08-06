@@ -5,3 +5,5 @@
 
 # Visual Studio
 **/.vs/
+**/x64/
+**/x86/

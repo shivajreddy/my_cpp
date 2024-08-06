@@ -5,10 +5,10 @@ using namespace std;
 
 void print_array(int *arr, int size);
 
-class Thing{};
-class Thing2{};
+class Thing {};
+class Thing2 {};
 
-    class Person {
+class Person {
  public:
   int age;
   Person(int age) { age = age; }

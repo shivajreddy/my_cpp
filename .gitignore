@@ -2,3 +2,6 @@
 
 # CMakeFiles
 **/CMakeFiles/
+
+# Visual Studio
+**/.vs/

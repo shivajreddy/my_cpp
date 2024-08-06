@@ -5,7 +5,7 @@ using namespace std;
 
 void print_array(int *arr, int size);
 
-class
+class Thing{};
 
     class Person {
  public:

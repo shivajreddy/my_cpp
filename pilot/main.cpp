@@ -5,7 +5,9 @@ using namespace std;
 
 void print_array(int *arr, int size);
 
-class Person {
+class
+
+    class Person {
  public:
   int age;
   Person(int age) { age = age; }
@@ -15,6 +17,7 @@ int main() {
   int arr[10] = {0};
   int n = sizeof(arr) / sizeof(arr[0]);
 
+  print_array(arr, n);
   print_array(arr, n);
 
   Person p1 = Person(39);

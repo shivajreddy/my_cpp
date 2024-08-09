@@ -1,8 +1,7 @@
 #include <iostream>
 #include <string>
 
-using std::cout;
-using std::string;
+using std::cout, std::string;
 
 enum LogLevel { INFO, WARNING, ERROR };
 
@@ -17,6 +16,7 @@ class Log {
   }
 };
 
+// Entry Point
 int main() {
   cout << "Top of the morning to ya lads! \n";
   Log logger = Log();

@@ -1,5 +1,17 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.10)
 
-project(classes)
+# project name and version
+project(classes VERSION 1.0)
 
-add_executable(${PROJECT_NAME} main.cpp)
+# Specify the C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Include all .cpp files from src/
+file(GLOB SRC_FILES src/*.cpp)
+
+# Add the Executable target
+add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+# Include Directories
+target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/src")

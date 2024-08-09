@@ -129,29 +129,53 @@ classes/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/classes.dir/build.make CMakeFiles/classes.dir/build
 .PHONY : classes/fast
 
-main.o: main.cpp.o
-.PHONY : main.o
+src/coin_change.o: src/coin_change.cpp.o
+.PHONY : src/coin_change.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/classes.dir/build.make CMakeFiles/classes.dir/main.cpp.o
-.PHONY : main.cpp.o
+src/coin_change.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/classes.dir/build.make CMakeFiles/classes.dir/src/coin_change.cpp.o
+.PHONY : src/coin_change.cpp.o
 
-main.i: main.cpp.i
-.PHONY : main.i
+src/coin_change.i: src/coin_change.cpp.i
+.PHONY : src/coin_change.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/classes.dir/build.make CMakeFiles/classes.dir/main.cpp.i
-.PHONY : main.cpp.i
+src/coin_change.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/classes.dir/build.make CMakeFiles/classes.dir/src/coin_change.cpp.i
+.PHONY : src/coin_change.cpp.i
 
-main.s: main.cpp.s
-.PHONY : main.s
+src/coin_change.s: src/coin_change.cpp.s
+.PHONY : src/coin_change.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/classes.dir/build.make CMakeFiles/classes.dir/main.cpp.s
-.PHONY : main.cpp.s
+src/coin_change.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/classes.dir/build.make CMakeFiles/classes.dir/src/coin_change.cpp.s
+.PHONY : src/coin_change.cpp.s
+
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
+
+# target to build an object file
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/classes.dir/build.make CMakeFiles/classes.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
+
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
+
+# target to preprocess a source file
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/classes.dir/build.make CMakeFiles/classes.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
+
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
+
+# target to generate assembly for a file
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/classes.dir/build.make CMakeFiles/classes.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
 
 # Help Target
 help:
@@ -162,9 +186,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... classes"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... src/coin_change.o"
+	@echo "... src/coin_change.i"
+	@echo "... src/coin_change.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
 .PHONY : help
 
 

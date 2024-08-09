@@ -18,6 +18,7 @@ class Log {
 };
 
 int main() {
+  cout << "Top of the morning to ya lads! \n";
   Log logger = Log();
 
   logger.send("testing");

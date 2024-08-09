@@ -12,12 +12,17 @@ int main() {
   Solution solution;
 
   {
+    cout << "\n";
     vector<int> coins = vector<int>{1, 2, 5};
-    cout << solution.coinChage(coins, 11) << std::endl;
+    int amount = 11;
+    int answer = 3;
+    cout << solution.coinChage(coins, amount) << " | " << answer << std::endl;
   }
-
   {
+    cout << "\n";
     vector<int> coins = vector<int>{2, 5};
-    cout << solution.coinChage(coins, 1) << std::endl;
+    int amount = 1;
+    int answer = 0;
+    cout << solution.coinChage(coins, amount) << " | " << answer << std::endl;
   }
 }

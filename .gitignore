@@ -3,6 +3,8 @@
 # CMakeFiles
 **/CMakeFiles/
 
+**/build/
+
 # Visual Studio
 **/.vs/
 **/x64/

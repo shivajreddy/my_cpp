@@ -7,22 +7,24 @@ using std::vector;
 #include "coin_change.h"
 
 int main() {
-  cout << "Problem: Coin Change \n";
-
   Solution solution;
 
   {
-    cout << "\n";
     vector<int> coins = vector<int>{1, 2, 5};
     int amount = 11;
     int answer = 3;
-    cout << solution.coinChage(coins, amount) << " | " << answer << std::endl;
+    cout << answer << " | " << solution.coinChage(coins, amount) << std::endl;
   }
   {
-    cout << "\n";
-    vector<int> coins = vector<int>{2, 5};
-    int amount = 1;
+    vector<int> coins = vector<int>{2};
+    int amount = 3;
+    int answer = -1;
+    cout << answer << " | " << solution.coinChage(coins, amount) << std::endl;
+  }
+  {
+    vector<int> coins = vector<int>{1};
+    int amount = 0;
     int answer = 0;
-    cout << solution.coinChage(coins, amount) << " | " << answer << std::endl;
+    cout << answer << " | " << solution.coinChage(coins, amount) << std::endl;
   }
 }

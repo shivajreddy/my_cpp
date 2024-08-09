@@ -16,6 +16,6 @@ int Solution::coinChage(vector<int> &coins, int amount) {
 }
 
 int rec(int amount, vector<int> &coins, unordered_map<int, int> &cache) {
-  cout << "finding " << amount << "\n";
+  cout << "finding " << amount << "\n ";
   return -1;
 }

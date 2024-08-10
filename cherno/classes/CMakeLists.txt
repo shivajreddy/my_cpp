@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Include all .cpp files from src/
-file(GLOB SRC_FILES src/*.cpp)
+file(GLOB SRC_FILES src/*.cpp src/*.h)
 
 # Add the Executable target
 add_executable(${PROJECT_NAME} ${SRC_FILES})

@@ -1,5 +1,3 @@
-// src/main.cpp
-
 // Prevent GLFW from including OpenGL headers automatically
 #define GLFW_INCLUDE_NONE
 

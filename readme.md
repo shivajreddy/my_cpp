@@ -72,4 +72,18 @@ cmake -S . -B out/build && cmake --build out/build
 cmake -S . -B out/build; cmake --build out/build
 ```
 
-
+### 4. Opening a project folder in Visual Studio, by creating solution
+- 1. Open `Visual Studio 2022`
+- 2. Choose `Continue without code`
+- 3. Go to `File` > `New` > `Project From Existing Code`
+- 4. Choose `Visual C++` as the type of project to create
+- 5.  - Choose the location of `my_game` as the `Project file location`
+       Example: `C:\Users\shiva\projects\my_game`
+      - For 'Project Name' use the same name as the project folder name, 
+        otherwise it will create a sub-folder.
+      - Check the 'Show all fines in Solution Explorer', then hit next
+- 6.  - Choose 'use Visual Studio'
+      - For 'Project Type', choose 'Console application project'
+      - Check 'Add support for the Common Language Runtime' and for drop down
+        choose default option i.e., 'Common Language Runtime Support'
+- 7. Hit finish

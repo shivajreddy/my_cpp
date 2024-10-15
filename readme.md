@@ -11,8 +11,8 @@
    |- CMakeLists.txt
    ```
 
-2. Below is a good
-# CMakeLists.txt
+2. This is a good starting point for the CMakeLists.txt file
+- CMakeLists.txt
 ```bash
 cmake_minimum_required(VERSION 3.10)
 
@@ -49,10 +49,12 @@ cmake -S . -B out/build
 cmake --build out/build
 ```
 Here is how you can combine both commands into one:
-```bash Linux
+- Linux
+```bash 
 cmake -S . -B out/build && cmake --build out/build
 ```
-```bash Windows PowerShell
+- Windows PowerShell
+```bash 
 cmake -S . -B out/build; cmake --build out/build
 ```
 

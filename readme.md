@@ -1,6 +1,3 @@
-
-$ ~/.local/share/nvim/mason/bin/clang-format --style Google --dump-config > .clang-format
-
 ### How to get started with running C++
 
 1. Go to the project folder that you want to create the program for

@@ -86,4 +86,11 @@ cmake -S . -B out/build; cmake --build out/build
       - For 'Project Type', choose 'Console application project'
       - Check 'Add support for the Common Language Runtime' and for drop down
         choose default option i.e., 'Common Language Runtime Support'
-- 7. Hit finish
+- 7. Hit finish, and Visual Studio will create the following files in 
+     your project folder
+    - my_game.sln
+    - my_game.vcxproj
+    - my_game.vcxproj.filters
+    - my_game.vcxproj.user
+
+

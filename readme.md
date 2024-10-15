@@ -44,9 +44,12 @@ endif()
 
 # Define a custom target 'run' that builds the project and runs the executable
 add_custom_target(run
-    COMMAND ${PROJECT_NAME}   # This runs the executable
-    DEPENDS ${PROJECT_NAME}   # Ensure the executable is built before running
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}  # Set working directory to the build directory
+    # This runs the executable
+    COMMAND ${PROJECT_NAME}   
+    # Ensure the executable is built before running
+    DEPENDS ${PROJECT_NAME}   
+    # Set working directory to the build directory
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}  
     COMMENT "Building and running the executable"
 )
 

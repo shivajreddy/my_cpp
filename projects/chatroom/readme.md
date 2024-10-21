@@ -15,4 +15,7 @@ Further improvements/thoughts:
 - user is typing... when someone is typing
 - colored messages on the terminal
 
+```bash
+find src/ -name '*.cpp' | entr -c sh -c 'g++ -std=c++17 src/main.cpp -o chatroom && ./chatroom'
+```
 

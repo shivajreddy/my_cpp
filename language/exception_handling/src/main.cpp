@@ -6,7 +6,7 @@ using std::cout;
 using std::string;
 
 class MyError : public std::exception {
-public:
+ public:
   string message = "default error message";
   MyError(string message) { this->message = message; }
 };

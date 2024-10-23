@@ -1,5 +1,5 @@
-#include <WS2tcpip.h>
 #include <winsock2.h>
+#include <WS2tcpip.h>
 
 #include <iostream>
 #include <string>
@@ -140,9 +140,7 @@ void accept_connections(SOCKET server_socket) {
       // Send response to the client
       string reply = "Message received";
       send(client_socket, reply.c_str(), reply.length(), 0);
-    } else if (recv_result == 0) {
-      cout << "Connection closing...\n";
-    } else {
+    } else if (recv_result < 0) {
       cerr << "Receive failed: " << WSAGetLastError() << "\n";
     }
 

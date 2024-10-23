@@ -21,6 +21,7 @@ int read_file(int x) {
     }
     cout << x << "\n";
     return x;
+
   } catch (const char *ex) {
     std::cerr << ex << "\n";
   } catch (int ex) {

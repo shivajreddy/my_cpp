@@ -61,6 +61,3 @@ private:
 public:
     Person(int &ref) : m_ref {ref} {}
 };
-
-void addOne(int i);
-void addOne(int &i);

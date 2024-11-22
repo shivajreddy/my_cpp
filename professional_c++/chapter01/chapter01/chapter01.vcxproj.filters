@@ -18,5 +18,11 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="use-of-const.cppm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="referances.cppm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

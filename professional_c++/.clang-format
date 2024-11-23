@@ -25,7 +25,12 @@ SpacesBeforeTrailingComments: 1
 AccessModifierOffset: -4
 IndentAccessModifiers: false  # Optional
 
+SpacesInAngles: false
+SpaceInEmptyParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInContainerLiterals: true
+Cpp11BracedListStyle: false
 SpacesInCStyleCastParentheses: false
-# SpacesInAngles: true
-SpaceBeforeCpp11BracedList: true
-
+SpaceBeforeCpp11BracedList: true    # Ensures space before opening brace
+SpaceBeforeAssignmentOperators: true

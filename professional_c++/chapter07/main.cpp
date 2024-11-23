@@ -17,8 +17,8 @@ void allocate_and_deallocate()
         // --------------------------------------------
         // Allocate, after use deallocate set ptr to nullptr
         // --------------------------------------------
-        int *ptr {new int}; // Allocated the size_of(int) on heap, and stores
-                            // its address on heap
+        int *ptr { new int }; // Allocated the size_of(int) on heap, and stores
+                              // its address on heap
 
         // Right now *ptr is some random value
         *ptr = 10;
@@ -31,7 +31,7 @@ void allocate_and_deallocate()
         // Allocate & Initialize, after use deallocate,
         // set ptr to nullptr
         // --------------------------------------------
-        int *ptr2 {new int(10)};
+        int *ptr2 { new int(10) };
         delete ptr2;
         ptr2 = nullptr;
     }
@@ -42,7 +42,7 @@ void allocate_and_deallocate()
         // Allocate an array of certain type, after use
         // deallocate set ptr to nullptr
         // --------------------------------------------
-        int *arr {new int[5]};
+        int *arr { new int[5] };
 
         // Dealocate memory & Set pointer to nullptr
         delete[] arr;
@@ -52,7 +52,7 @@ void allocate_and_deallocate()
         // Allocate & Initialize, after use deallocate,
         // set ptr to nullptr
         // --------------------------------------------
-        int *arr2 {new int[] {10, 20, 30}};
+        int *arr2 { new int[] { 10, 20, 30 } };
 
         delete arr2;
         arr2 = nullptr;
@@ -64,7 +64,7 @@ void allocate_and_deallocate()
         // set ptr to nullptr
         // --------------------------------------------
         size_t size = 5; // can also be of type int
-        int *arr {new int[size]};
+        int *arr { new int[size] };
 
         delete[] arr;
         arr = nullptr;
@@ -81,18 +81,21 @@ public:
 
 void multiple_allocations()
 {
-    const size_t size {5};
-    Simple **mySimplePtrArray {new Simple *[size]};
+    const size_t size { 5 };
+
+    // Pg. 229
+    // Allocate an Array, that will hold pointers
+    Simple **mySimplePtrArray { new Simple *[size] };
 
     // Allocate an object for each pointer
-    for (size_t i {0}; i < size; ++i) {
-        mySimplePtrArray[i] = new Simple {};
+    for (size_t i { 0 }; i < size; ++i) {
+        mySimplePtrArray[i] = new Simple {}; // each item is a pointer
     }
 
     // use mySimplePtrArray
 
     // Delete each allocated object
-    for (size_t i {0}; i < size; ++i) {
+    for (size_t i { 0 }; i < size; ++i) {
         delete mySimplePtrArray[i];
         mySimplePtrArray[i] = nullptr;
     }

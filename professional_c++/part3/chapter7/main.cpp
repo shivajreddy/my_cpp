@@ -20,6 +20,7 @@ int main()
     unique_ptr<Person> p = make_unique<Person>();
     cout << "hi" << endl;
     p->go();
+    cout
 }
 
 class HashMap

@@ -4,6 +4,7 @@
 **/CMakeFiles/
 
 **/build/
+**/out
 
 # Visual Studio
 **/.vs/

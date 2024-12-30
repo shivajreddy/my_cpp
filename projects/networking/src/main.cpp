@@ -1,15 +1,3 @@
-/*
-#include <iostream>
-
-using namespace std;
-
-int main()
-{
-    cout << "Hello There" << endl;
-    return 0;
-}
-*/
-
 #include <asio.hpp>
 #include <iostream>
 

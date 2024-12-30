@@ -10,6 +10,7 @@ int main()
         timer.wait();
 
         std::cout << "Hello, ASIO! Timer expired after 3 seconds." << std::endl;
+        std::cout << "Hello, ASIO! Timer expired after 3 seconds." << std::endl;
     }
     catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;

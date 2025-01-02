@@ -6,8 +6,13 @@ project(fractal)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Specify the executable target
-add_executable(${PROJECT_NAME} src/main.cpp)
+
+# Gather source files
+file(GLOB CPP_FILES "src/*.cpp")
+file(GLOB HEADER_FILES "include/*.h")
+
+# Add executable
+add_executable(${PROJECT_NAME} ${CPP_FILES} ${HEADER_FILES})
 
 # Include Raylib headers
 include_directories(${CMAKE_SOURCE_DIR}/lib/raylib/include)

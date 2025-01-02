@@ -1,39 +1,33 @@
 #include "../lib/raylib/include/raylib.h"
-#include <sstream>
-#include <stdexcept>
+#include "helpers.h"
+
+#include <chrono>
 #include <string>
+#include <thread>
 
-// Convert a hex color string to Raylib Color
-Color hexToRaylibColor(const std::string &hexColor)
+// Show a counter
+void start_count_down(int *count_from)
 {
-    // Remove '#' if present
-    std::string hex = (hexColor[0] == '#') ? hexColor.substr(1) : hexColor;
+    auto start_time = std::chrono::steady_clock::now();
+    int elapsed_seconds = 0;
 
-    // Validate hex string length
-    if (hex.length() != 6 && hex.length() != 8) {
-        throw std::invalid_argument(
-            "Invalid hex color. Must be #RRGGBB or #RRGGBBAA");
+    while (*count_from > 0) {
+        // Calculate elapsed time
+        auto current_time = std::chrono::steady_clock::now();
+
+        int new_elapsed_seconds =
+            std::chrono::duration_cast<std::chrono::seconds>(current_time -
+                                                             start_time)
+                .count();
+
+        // Ensure a full second has passed
+        if (new_elapsed_seconds > elapsed_seconds) {
+            elapsed_seconds = new_elapsed_seconds;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        (*count_from)--;
     }
-
-    // If 6-digit hex, add full opacity
-    if (hex.length() == 6) {
-        hex += "FF";
-    }
-
-    // Convert hex to integer values
-    unsigned int rgba;
-    std::stringstream ss;
-    ss << std::hex << hex;
-    ss >> rgba;
-
-    // Extract color components
-    unsigned char r = (rgba >> 24) & 0xFF;
-    unsigned char g = (rgba >> 16) & 0xFF;
-    unsigned char b = (rgba >> 8) & 0xFF;
-    unsigned char a = rgba & 0xFF;
-
-    // Return Raylib Color
-    return Color { r, g, b, a };
 }
 
 int main()
@@ -43,32 +37,40 @@ int main()
 
     InitWindow(screenWidth, screenHeight, "raylib");
 
-    SetTargetFPS(60);            // Set our game to run at 60 frames-per-second
+    auto start_time = std::chrono::steady_clock::now();
+    int elapsed_seconds = 0;
+
+    int start_time_count = 10;
+    int *ptr = &start_time_count;
+
+    SetTargetFPS(540);           // Set our game to run at 60 frames-per-second
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        int current_pos_x = 0, current_pos_y = 0;
+        *ptr += 1;
 
-        DrawText("Array visual lets go c++!", current_pos_x, current_pos_y, 20,
-                 hexToRaylibColor("FFDD33"));
-        current_pos_y += 20;
+        // Calculate elapsed time
+        auto current_time = std::chrono::steady_clock::now();
 
-        int total_boxes = 10;
-
-        // Create Boxes
-        const int REC_WIDTH = 50, REC_HEIGHT = 50; // Box-Size
-        int x = current_pos_x, y = current_pos_y;  // Box-Postion
-        int box_padding = 10;
-
-        for (int i = 0; i < total_boxes; i++) {
-            // Rectangle
-            DrawRectangle(x, y, REC_WIDTH, REC_HEIGHT, PURPLE);
-            x += (REC_WIDTH + box_padding);
+        int new_elapsed_seconds =
+            std::chrono::duration_cast<std::chrono::seconds>(current_time -
+                                                             start_time)
+                .count();
+        // Ensure a full second has passed
+        if (new_elapsed_seconds > elapsed_seconds) {
+            elapsed_seconds = new_elapsed_seconds;
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-        int padding = 10;
+        // start_count_down(&start_time);
+        std::string num_str = std::to_string(*ptr);
+        auto str = num_str.c_str();
+
+        // RLAPI void DrawText(const char *text, int posX, int posY, int
+        // fontSize, Color color); // Draw text (using default font)
+        DrawText(str, 40, 80, 20, hexToRaylibColor("FFDD33"));
 
         EndDrawing();
     }

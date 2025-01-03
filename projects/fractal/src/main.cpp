@@ -14,41 +14,39 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
     auto primary_color = hexToRaylibColor("FFDD33");
 
-    int counter = 0;
-    // std::chrono::
+    auto program_start_time = std::chrono::system_clock().now();
 
-    // Set program start time
-    std::chrono::time_point program_start_time =
-        std::chrono::system_clock().now();
+    int fps_counter = 0; // Counts frames within current second
+    int current_fps = 0; // Stores the calculated FPS to display
+    std::chrono::time_point last_time = std::chrono::system_clock().now();
 
-    SetTargetFPS(540);           // Set our game to run at 60 frames-per-second
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        // Draw FPS
-        counter += 1;
-        int fps;
+        // Increment fram counter
+        fps_counter++;
 
+        // Get current time
         auto current_time = std::chrono::system_clock().now();
 
-        std::chrono::duration duration = current_time - program_start_time;
+        // Calcuate elapsed time since last update
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                           current_time - last_time)
+                           .count();
 
-        auto time_elapsed_in_seconds =
-            std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+        // One second passed
+        if (elapsed >= 1000) {
+            current_fps = fps_counter; // Update FPS Value
+            fps_counter = 0;           // Reset counter
+            last_time = current_time;  // Reset time
+        }
 
+        // Display fps
         char fps_str[20];
-        snprintf(fps_str, sizeof(fps_str), "FPS: %zu", time_elapsed_in_seconds);
-
-        // Check if 1 sec has passed
-        // if () {
-        // Update fps
-        // snprintf(fps_str, sizeof(fps_str), "%d", counter);
-        // }
-
-        // Draw FPS
-        DrawText(fps_str, SCREEN_WIDTH - 500, 80, 60, primary_color);
+        snprintf(fps_str, sizeof(fps_str), "FPS: %d /second", current_fps);
+        DrawText(fps_str, 50, 400, 60, primary_color);
 
         EndDrawing();
     }

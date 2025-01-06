@@ -24,7 +24,6 @@ template <int N> void Array()
     for (int i = 0; i < N; i++) {
         arr[i] = i + 10;
     }
-
     // Print the array
     print_array(arr, N);
 }

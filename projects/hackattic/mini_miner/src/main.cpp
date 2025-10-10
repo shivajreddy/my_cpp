@@ -6,9 +6,12 @@
 
 using namespace std;
 
-// 1. connect to the problem endpoint
-// GET /challenges/mini_miner/problem?access_token=84173d1e3ccdb099
-// 2. read the JSON output
+/*
+1. Connect to the problem endpoint
+   GET /challenges/mini_miner/problem?access_token=84173d1e3ccdb099
+2. Read the JSON output
+3.
+*/
 
 int main() {
     cout << "Mini Miner\n";
@@ -16,7 +19,7 @@ int main() {
     cout << "Stage1: Getting Data\n";
     string* res = get_data();
     if (res == nullptr) { // failed to GET data
-        exit(1);
+        return EXIT_FAILURE;
     }
     cout << *res << "\n";
 

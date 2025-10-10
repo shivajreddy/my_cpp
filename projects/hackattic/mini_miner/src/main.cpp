@@ -5,6 +5,7 @@
 
 // project includes
 #include "get_data.h"
+#include "parse_data.h"
 #include "process_data.h"
 
 using namespace std;
@@ -20,17 +21,21 @@ int main() {
     cout << "Mini Miner\n";
 
     cout << "Stage1: Getting Data\n";
-    auto data = get_data();
-    if (!data) { // failed to GET data
+    auto raw = get_data();
+    if (!raw) { // failed to GET data
         return EXIT_FAILURE;
     }
-    cout << *data << "\n";
+    cout << *raw << "\n";
 
-    cout << "Stage2: Process Data\n";
-    auto processed_data = process_data(*data);
-    if (!processed_data) {
+    cout << "Stage2: Parse Data\n";
+    auto data = parse_api_response(*raw);
+    if (!data) {
         return EXIT_FAILURE;
     }
+    // cout << data->difficulty << endl;
+    // cout << data->block.data[0].first << endl;
 
+    cout << "Stage3: Process Data\n";
+    process_data(*data);
     return 0;
 }

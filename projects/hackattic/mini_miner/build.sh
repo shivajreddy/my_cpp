@@ -12,7 +12,7 @@ OUT="$BUILD_DIR/main"
 INCLUDES="-Iinclude"
 
 # Libraries to Link
-LIBS="-lcurl"
+LIBS="-lcurl -lssl -lcrypto"
 
 # === BUILD ===
 mkdir -p "$BUILD_DIR"

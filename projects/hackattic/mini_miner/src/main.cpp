@@ -1,8 +1,11 @@
 // system includes
+#include <cstdlib>
 #include <iostream>
+#include <optional>
 
 // project includes
 #include "get_data.h"
+#include "process_data.h"
 
 using namespace std;
 
@@ -17,13 +20,17 @@ int main() {
     cout << "Mini Miner\n";
 
     cout << "Stage1: Getting Data\n";
-    string* res = get_data();
-    if (res == nullptr) { // failed to GET data
+    auto data = get_data();
+    if (!data) { // failed to GET data
         return EXIT_FAILURE;
     }
-    cout << *res << "\n";
+    cout << *data << "\n";
 
     cout << "Stage2: Process Data\n";
+    auto processed_data = process_data(*data);
+    if (!processed_data) {
+        return EXIT_FAILURE;
+    }
 
     return 0;
 }

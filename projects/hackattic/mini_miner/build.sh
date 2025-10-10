@@ -3,7 +3,7 @@ set -e # Exit on any error
 
 # === CONFIG ===
 CXX=g++
-CXXFLAGS="-Wall -Wextra -std=c++23"
+CXXFLAGS="-std=c++23 -Wall -Wextra"
 SRC_DIR="src"
 BUILD_DIR="build"
 OUT="$BUILD_DIR/main"

@@ -1,6 +1,7 @@
 #include "get_data.h"
 #include <curl/curl.h> // library to make GET requests
 #include <iostream>
+#include <optional>
 #include <string>
 
 #define RESP_LEN 10000
@@ -17,29 +18,31 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     return total_size;
 }
 
-string* get_data() {
+std::optional<string> get_data() {
+    // Initalize CURL object
     CURL* curl = curl_easy_init();
     if (curl == nullptr) {
-        std::cerr << "Failed to initialize CURL\n";
-        return nullptr;
+        std::cerr << "Failed to initialize curl\n";
+        return std::nullopt;
     }
 
-    string response;
+    string response; // save the response to this string
 
+    // Set curl options: url, callback fn, location to save response
     curl_easy_setopt(curl, CURLOPT_URL, API_ENDPOINT);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
+    // Perform the curl operation
     CURLcode res = curl_easy_perform(curl);
-
-    if (res != CURLE_OK) {
-        std::cerr << "CURL request failed: " << curl_easy_strerror(res) << "\n";
-        curl_easy_cleanup(curl);
-        return nullptr;
-    }
-
-    // Success
-    // std::cout << "Response:\n" << response << "\n";
     curl_easy_cleanup(curl);
-    return new string(response); // success
+
+    // GET Failed
+    if (res != CURLE_OK) {
+        std::cerr << "GET request failed\n";
+        return std::nullopt;
+    };
+
+    // GET 200 OK
+    return response;
 }

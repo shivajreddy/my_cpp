@@ -20,7 +20,7 @@ int main() {
     }
     cout << *res << "\n";
 
-    cout << "Stage1: Getting Data\n";
+    cout << "Stage2: Process Data\n";
 
     return 0;
 }

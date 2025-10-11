@@ -26,7 +26,9 @@ void process_data(ApiResponse res) {
     cout << "sample_input: " << sample_input << endl;
     cout << "sha256(sample_input):" << sha256(sample_input) << endl;
 
-    auto samp_data = parse_api_response(sample_input);
+    auto res_val = res.to_string();
+    cout << "sha256(res_val): " << sha256(res_val) << endl;
+    // auto samp_data = parse_api_response(sample_input);
     // auto samp_data_str = samp_data->to_string();
     // cout << "sample_data: " << samp_data_str << endl;
     // cout << "sha256(sample_data):" << sha256(samp_data_str) << endl;

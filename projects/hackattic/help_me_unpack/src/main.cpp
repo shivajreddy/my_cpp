@@ -10,13 +10,43 @@ using json = nlohmann::json;
 val = z0r/iB5AuLZaXwAA96EGQ1UFvMO2JnNAQHMmtsO8BVU=
 base64 encoded
 
-int
-unsigned int
-short
-float
-double (probably little endian)
-double (big endian)
- */
+32bit platform
+int             : 4bytes
+unsigned int    : 4bytes
+short           : 2?
+float           : 8?
+double (probably little endian) : 8?
+double (big endian)             : 8?
+*/
+
+struct Answer {
+    int _int;
+    unsigned int _uint;
+    short _short;
+    float _float;
+    double _double;
+    double _double2;
+
+    void print() const {
+        cout << _int << endl;
+        cout << _uint << endl;
+        cout << _short << endl;
+        cout << _float << endl;
+        cout << _double << endl;
+        cout << _double2 << endl;
+    }
+};
+
+Answer get_answer(string data) {
+    Answer res;
+    res._int = 1;
+    res._uint = 1;
+    res._short = 1;
+    res._float = 1;
+    res._double = 1;
+    res._double2 = 1;
+    return res;
+};
 
 int main() {
     cout << "Help me unpack\n";
@@ -40,6 +70,9 @@ int main() {
     }
     string val = json_data["bytes"];
     cout << "val: " << val << endl;
+
+    Answer ans = get_answer(val);
+    ans.print();
 
     return 0;
 }

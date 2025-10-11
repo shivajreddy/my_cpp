@@ -36,8 +36,12 @@ struct Answer {
         cout << _double2 << endl;
     }
 };
+#include <openssl/evp.h>
 
 Answer get_answer(string data) {
+    // decode the data
+    cout << data << endl;
+
     Answer res;
     res._int = 1;
     res._uint = 1;

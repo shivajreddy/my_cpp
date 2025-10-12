@@ -1,5 +1,5 @@
-# Help me unpack
+# Reading QR
 
-- Challenge Link: https://hackattic.com/challenges/help_me_unpack
+- Challenge Link: https://hackattic.com/challenges/reading_qr
 
 

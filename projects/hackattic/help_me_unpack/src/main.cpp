@@ -9,16 +9,27 @@ using namespace std;
 using json = nlohmann::json;
 
 /*
-val = z0r/iB5AuLZaXwAA96EGQ1UFvMO2JnNAQHMmtsO8BVU=
-base64 encoded
+example base64 encoded string = z0r/iB5AuLZaXwAA96EGQ1UFvMO2JnNAQHMmtsO8BVU=
 
 32bit platform
 int             : 4bytes
 unsigned int    : 4bytes
 short           : 2
-float           : 8?
-double (probably little endian) : 8?
-double (big endian)             : 8?
+float           : 4
+double (probably little endian) : 8
+double (big endian)             : 8
+
+Offset  Size  Type                Value
+------  ----  ------------------  -----
+0-3     4     int
+4-7     4     unsigned int
+8-9     2     short
+10-13   4     float               ← 4 bytes
+14-21   8     double (LE)         ← 8 bytes
+22-29   8     double (BE)         ← 8 bytes
+------
+Total: 30 bytes used, 2 bytes remaining
+
 */
 
 size_t get_decoded_size(const string& encoded_str) {
@@ -95,33 +106,40 @@ string unpack_bytes_str(string encoded_str) {
     vector<uint8_t> bytes = base64_decode(encoded_str);
     // for (uint8_t byte : bytes) cout << (int)byte << " ";
     // cout << endl;
-    int a = read_value<int>(bytes, 0);
-    int b = read_value<int>(bytes, 4);
-    int c = read_value<short>(bytes, 8);
-    int d = read_value<float>(bytes, 10);
-    int e = read_value<double>(bytes, 14);      // little-endian
-    int f = read_big_endian<double>(bytes, 22); // big-endian
 
-    auto make_json = [&](int a, unsigned int b, short c, float d, double e,
-                         double f) {
+    int a = read_value<int>(bytes, 0);                   // offset 0-3 (4 bytes)
+    unsigned int b = read_value<unsigned int>(bytes, 4); // offset 4-7 (4 bytes)
+    short c = read_value<short>(bytes, 8);               // offset 8-9 (2 bytes)
+    // 2 BYTES PADDING HERE (offset 10-11)
+    float d = read_value<float>(bytes, 12);        // offset 12-15 (4 bytes) ✓
+    double e = read_value<double>(bytes, 16);      // offset 16-23 (8 bytes) ✓
+    double f = read_big_endian<double>(bytes, 24); // offset 24-31 (8 bytes) ✓
+
+    // Helper to format double without trailing zeros
+    auto format_double = [](double val) -> string {
         std::ostringstream oss;
-        oss << std::fixed
-            << std::setprecision(6); // control float/double formatting
+        oss << std::fixed << std::setprecision(14) << val;
+        string str = oss.str();
 
-        oss << "{";
-        oss << "\"int\": " << a << ", ";
-        oss << "\"uint\": " << b << ", ";
-        oss << "\"short\": " << c << ", ";
-        oss << "\"float\": " << d << ", ";
-        oss << "\"double\": " << e << ", ";
-        oss << "\"big_endian_double\": \"" << f << "\"";
-        oss << "}";
+        // Remove trailing zeros
+        str.erase(str.find_last_not_of('0') + 1, string::npos);
+        // Remove trailing decimal point if all decimals were zeros
+        if (str.back() == '.') str.pop_back();
 
-        return oss.str();
+        return str;
     };
-    // string json_str = make_json(1, 2, 3, 4.4, 5.5, 6.6);
-    string json_str = make_json(a, b, c, d, e, f);
-    return json_str;
+
+    std::ostringstream oss;
+    oss << "{";
+    oss << "\"int\": " << a << ", ";
+    oss << "\"uint\": " << b << ", ";
+    oss << "\"short\": " << c << ", ";
+    oss << "\"float\": " << std::fixed << std::setprecision(14) << d << ", ";
+    oss << "\"double\": " << format_double(e) << ", ";
+    oss << "\"big_endian_double\": " << format_double(f) << " ";
+    oss << "}";
+
+    return oss.str();
 };
 
 int main() {

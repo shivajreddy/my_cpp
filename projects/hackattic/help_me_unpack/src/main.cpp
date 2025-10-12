@@ -1,8 +1,9 @@
 #include "api.h"
-#include <cstdint>
+#include "base64.h"
 #include <cstdlib>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <sstream>
 
 using namespace std;
 using json = nlohmann::json;
@@ -19,162 +20,77 @@ float           : 8?
 double (probably little endian) : 8?
 double (big endian)             : 8?
 */
+// Convert a double to big-endian byte order and return as hex string
+std::string double_to_big_endian_hex(double value) {
+    uint64_t temp;
+    std::memcpy(&temp, &value, sizeof(double));
 
-class Base64 {
-private:
-    // Base64 character set
-    static const std::string base64_chars;
+    // Check system endianness
+    uint16_t test = 0x1;
+    bool is_little_endian = *reinterpret_cast<uint8_t*>(&test) == 0x1;
 
-    // Helper function to check if a character is base64
-    static inline bool is_base64(unsigned char c) {
-        return (isalnum(c) || (c == '+') || (c == '/'));
-    }
-
-public:
-    // Encode binary data to base64 string
-    static std::string encode(const std::vector<unsigned char>& data) {
-        std::string ret;
-        int i = 0;
-        unsigned char char_array_3[3];
-        unsigned char char_array_4[4];
-        size_t in_len = data.size();
-        size_t pos = 0;
-
-        while (in_len--) {
-            char_array_3[i++] = data[pos++];
-
-            if (i == 3) {
-                // Convert 3 bytes to 4 base64 characters
-                char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-                char_array_4[1] = ((char_array_3[0] & 0x03) << 4) +
-                                  ((char_array_3[1] & 0xf0) >> 4);
-                char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) +
-                                  ((char_array_3[2] & 0xc0) >> 6);
-                char_array_4[3] = char_array_3[2] & 0x3f;
-
-                for (i = 0; i < 4; i++) ret += base64_chars[char_array_4[i]];
-                i = 0;
-            }
+    if (is_little_endian) {
+        // Reverse bytes if system is little-endian
+        uint64_t reversed = 0;
+        for (int i = 0; i < 8; i++) {
+            reversed |= ((temp >> (8 * i)) & 0xFFULL) << (8 * (7 - i));
         }
-
-        // Handle remaining bytes (padding)
-        if (i) {
-            for (int j = i; j < 3; j++) char_array_3[j] = '\0';
-
-            char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-            char_array_4[1] = ((char_array_3[0] & 0x03) << 4) +
-                              ((char_array_3[1] & 0xf0) >> 4);
-            char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) +
-                              ((char_array_3[2] & 0xc0) >> 6);
-
-            for (int j = 0; j < i + 1; j++)
-                ret += base64_chars[char_array_4[j]];
-
-            while (i++ < 3) ret += '=';
-        }
-
-        return ret;
+        temp = reversed;
     }
 
-    // Overload for string input
-    static std::string encode(const std::string& input) {
-        std::vector<unsigned char> data(input.begin(), input.end());
-        return encode(data);
+    // Convert to hex string
+    std::ostringstream oss;
+    oss << std::hex << std::uppercase << std::setfill('0');
+    for (int i = 7; i >= 0; i--) {
+        oss << std::setw(2) << ((temp >> (i * 8)) & 0xFF);
     }
 
-    // Decode base64 string to binary data
-    static std::vector<unsigned char>
-    decode(const std::string& encoded_string) {
-        size_t in_len = encoded_string.size();
-        int i = 0;
-        int in_ = 0;
-        unsigned char char_array_4[4], char_array_3[3];
-        std::vector<unsigned char> ret;
+    return oss.str();
+}
 
-        while (in_len-- && (encoded_string[in_] != '=') &&
-               is_base64(encoded_string[in_])) {
-            char_array_4[i++] = encoded_string[in_];
-            in_++;
+std::string make_json(int a, unsigned int b, short c, float d, double e,
+                      double f_big_endian) {
+    std::ostringstream oss;
+    oss << std::fixed
+        << std::setprecision(6); // control float/double formatting
 
-            if (i == 4) {
-                // Convert each base64 char to its index
-                for (i = 0; i < 4; i++)
-                    char_array_4[i] = base64_chars.find(char_array_4[i]);
+    oss << "{";
+    oss << "\"int\": " << a << ", ";
+    oss << "\"uint\": " << b << ", ";
+    oss << "\"short\": " << c << ", ";
+    oss << "\"float\": " << d << ", ";
+    oss << "\"double\": " << e << ", ";
+    oss << "\"double_big_endian\": \"" << double_to_big_endian_hex(f_big_endian)
+        << "\"";
+    oss << "}";
 
-                // Convert 4 base64 characters back to 3 bytes
-                char_array_3[0] =
-                    (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-                char_array_3[1] = ((char_array_4[1] & 0xf) << 4) +
-                                  ((char_array_4[2] & 0x3c) >> 2);
-                char_array_3[2] =
-                    ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+    return oss.str();
+}
 
-                for (i = 0; i < 3; i++) ret.push_back(char_array_3[i]);
-                i = 0;
-            }
-        }
-
-        // Handle remaining characters
-        if (i) {
-            for (int j = 0; j < i; j++)
-                char_array_4[j] = base64_chars.find(char_array_4[j]);
-
-            char_array_3[0] =
-                (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) +
-                              ((char_array_4[2] & 0x3c) >> 2);
-
-            for (int j = 0; j < i - 1; j++) ret.push_back(char_array_3[j]);
-        }
-
-        return ret;
-    }
-
-    // Decode to string (for text data)
-    static std::string decode_to_string(const std::string& encoded_string) {
-        std::vector<unsigned char> decoded = decode(encoded_string);
-        return { decoded.begin(), decoded.end() };
-    }
-};
-
-// Define the base64 character set
-const std::string Base64::base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                         "abcdefghijklmnopqrstuvwxyz"
-                                         "0123456789+/";
-
-struct Answer {
-    int32_t _int;
-    uint32_t _uint;
-    int16_t _short;
-    float _float;
-    double _double;
-    double _double2;
-
-    void print() const {
-        cout << _int << endl;
-        cout << _uint << endl;
-        cout << _short << endl;
-        cout << _float << endl;
-        cout << _double << endl;
-        cout << _double2 << endl;
-    }
-};
-
-Answer get_answer(string data) {
+string get_answer(string encoded_str) {
     // decode the data
-    // c0IOjeK0U7hPggAApeEYQ4F5FUjF4lVAQFXixUgVeYE=
-    // how to even unpack it?
-    cout << data << endl;
-    cout << Base64::decode_to_string(data) << endl;
+    // c0IO jeK0 U7hP ggAA peEY Q4F5 FUjF 4lVA QFXi xUgV eYE=
+    cout << "encoded_str: " << encoded_str << endl;
+    // z0r / iB5A uLZa XwAA 96EG Q1UF vMO2 JnNA QHMm tsO8 BVU =
+    // string s = "QUJD";
+    // bitset<24> bs = base64_to_bits(s);
+    // cout << base64_to_bits(s) << endl;
+    // cout << bits_to_str(bs) << endl;
 
-    Answer res;
-    res._int = 1;
-    res._uint = 1;
-    res._short = 1;
-    res._float = 1;
-    res._double = 1;
-    res._double2 = 1;
-    return res;
+    string s = "QUJDQUJDQU==";
+    s = "z0r/iB5AuLZaXwAA96EGQ1UFvMO2JnNAQHMmtsO8BVU=";
+    s = "z0r/";
+    string res = "";
+    for (size_t i = 0; i < s.size(); i += 4) {
+        auto sub_s = s.substr(i, 4);
+        bitset<24> bs = base64_to_bits(sub_s);
+        res += bits_to_str(bs);
+    }
+    cout << "decoded: " << res << endl;
+
+    string json_str = make_json(1, 2, 3, 4.4, 5.5, 6.6);
+
+    return json_str;
 };
 
 int main() {
@@ -183,25 +99,20 @@ int main() {
     cout << "Stage1: Get Data\n";
     const char* URL = "https://hackattic.com/challenges/help_me_unpack/"
                       "problem?access_token=84173d1e3ccdb099";
+
     optional<string> data = get_data(URL);
-
-    if (!data) {
-        return EXIT_FAILURE;
-    }
-    cout << "data: " << *data << endl;
-
-    // string data_str = *data;
-    // cout << "data: " << data_str << endl;
+    if (!data) return EXIT_FAILURE;
 
     auto json_data = json::parse(*data);
-    if (!json_data.contains("bytes")) {
-        return EXIT_FAILURE;
-    }
-    string val = json_data["bytes"];
-    cout << "val: " << val << endl;
+    if (!json_data.contains("bytes")) return EXIT_FAILURE;
 
-    Answer ans = get_answer(val);
-    ans.print();
+    cout << "Stage2: Decode string\n";
+    string json_str = get_answer(json_data["bytes"]);
+
+    cout << "Stage 3: Post Data\n";
+    const char* POST_URL = "https://hackattic.com/challenges/help_me_unpack/"
+                           "solve?access_token=84173d1e3ccdb099";
+    api_post_data(POST_URL, json_str);
 
     return 0;
 }

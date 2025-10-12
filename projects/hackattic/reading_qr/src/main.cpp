@@ -8,7 +8,9 @@ using json = nlohmann::json;
 
 // Read QR code
 void read_qrcode() {
-    const char* img_path = "/Users/smpl/Desktop/test.png";
+    const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
+    // const char* img_path = "/Users/smpl/Desktop/test2.png"; // no padding
+    // const char* img_path = "/Users/smpl/Desktop/test3.png"; // color
 
     int width, height, channels;
     // image is a 1D array of pixels
@@ -17,13 +19,26 @@ void read_qrcode() {
     printf("Image loaded: Width=%d, Height=%d, Channels=%d\n", width, height,
            channels);
 
+    /*
+    h=2 w=2 c=4
+    rgba rgba
+    */
     // cout << "sizeof(image): " << sizeof(image) << endl;
     // for (auto pixel : image) { cout << pixel << endl; }
     cout << "h*w: " << height * width << endl; // 69696
-    for (int w = 0; w < width; w++)
-        for (int h = 0; h < height; h++) {
+    for (int h = 0; h < height; h++)
+        for (int w = 0; w < width; w++) {
             size_t pixel_idx = (size_t)(h * width + w) * channels;
             // cout << pixel_idx << " : " << image[pixel_idx] << endl;
+            int r = image[pixel_idx];
+            int g = image[pixel_idx + 1];
+            int b = image[pixel_idx + 2];
+            if (channels >= 4) {
+                int c = image[pixel_idx + 3];
+                printf("r:%d g:%d b:%d c:%d\n", r, g, b, c);
+            } else {
+                printf("r:%d g:%d b:%d\n", r, g, b);
+            }
         }
 
     stbi_image_free(image); // free up the image, closes the fd

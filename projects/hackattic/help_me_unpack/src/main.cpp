@@ -1,6 +1,7 @@
 #include "api.h"
 #include "base64.h"
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
@@ -134,9 +135,13 @@ string unpack_bytes_str(string encoded_str) {
     oss << "\"int\": " << a << ", ";
     oss << "\"uint\": " << b << ", ";
     oss << "\"short\": " << c << ", ";
-    oss << "\"float\": " << std::fixed << std::setprecision(14) << d << ", ";
+
+    oss << std::fixed << std::setprecision(14);
+    oss << "\"float\": " << d << ", ";
+
     oss << "\"double\": " << format_double(e) << ", ";
     oss << "\"big_endian_double\": " << format_double(f) << " ";
+
     oss << "}";
 
     return oss.str();
@@ -161,7 +166,7 @@ int main() {
 
     cout << "Stage 3: Post Data\n";
     const char* POST_URL = "https://hackattic.com/challenges/help_me_unpack/"
-                           "solve?access_token=84173d1e3ccdb099";
+                           "solve?access_token=84173d1e3ccdb099&playground=1";
     api_post_data(POST_URL, json_str);
 
     return 0;

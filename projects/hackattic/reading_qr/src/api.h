@@ -11,7 +11,8 @@ using std::optional;
 using std::string;
 
 // string get_data(const char* URL);
-optional<string> get_data(const char* URL);
+optional<string> curl_get(string URL);
+void save_image(string image_url);
 
 void post_response();
 

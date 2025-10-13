@@ -25,15 +25,18 @@ bool is_white(const Image& image, size_t pix_idx) {
     return (r == 255 && b == 255 && g == 255);
 };
 
-pair<size_t, size_t> top_left_square(const Image& image, size_t idx,
-                                     size_t pad) {
-    printf("finding coords at %zu pad:%zu\n", idx, pad);
-    size_t tl = idx, tr = idx;
-    int w = pad;
-    for (; w < image.width; w++)
-        while (is_black(image, tr++));
+pair<size_t, size_t> top_left_square(const Image& image, size_t idx) {
+    size_t pixel_num = idx / image.channels;
+    size_t start_h = pixel_num / image.width, start_w = pixel_num / image.width;
+    printf("finding coords at start_h:%zu start_w:%zu\n", start_h, start_w);
+
+    int w = start_w;
+    for (; w < image.width; w++) {
+        size_t pix_idx = (size_t)(start_h * image.width + w) * image.channels;
+        if (!is_black(image, pix_idx)) break;
+    }
     if (w == image.width) return { -1, -1 };
-    return { tl, tr-- };
+    return { start_w, --w };
 }
 
 // Step 1: Identify the three squares
@@ -56,7 +59,7 @@ void identify_squares(const Image& image) {
         }
     }
     if (top_left) {
-        auto res = top_left_square(image, tl_idx, tl_padding);
+        auto res = top_left_square(image, tl_idx);
         cout << res.first << "," << res.second << endl;
     } else {
         cout << "Failed to find topleft\n";

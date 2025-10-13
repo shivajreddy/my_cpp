@@ -7,10 +7,25 @@ using namespace std;
 using json = nlohmann::json;
 
 struct Image {
+public:
     unsigned char* pixels;
     int width;
     int height;
     int channels;
+
+public:
+    size_t pix_idx(int h, int w) {
+        return (size_t)(h * width + w) + channels;
+    }
+    pair<int, int> coords(size_t pixel_idx) {
+        size_t pixel_num = pixel_idx / channels;
+        size_t start_h = pixel_num / width, start_w = pixel_num / width;
+        return { start_h, start_w };
+    }
+    // tuple<int, int, int> rgb(size_t pix_idx) {
+    array<int, 3> rgb(size_t pix_idx) {
+        return { pixels[pix_idx], pixels[pix_idx + 1], pixels[pix_idx + 2] };
+    }
 };
 
 bool is_transparent(const Image& image, size_t pix_idx) {
@@ -31,6 +46,19 @@ bool is_white(const Image& image, size_t pix_idx) {
         b = image.pixels[pix_idx + 2];
     return (r == 255 && g == 255 && b == 255);
 };
+
+// STAGE 1 : PREPROCESSING
+void pre_process(Image* image) {
+    // Grayyscale conversion
+    for (int h = 0; h < image->height; h++) {
+        for (int w = 0; w < image->width; w++) {
+            size_t idx = image->pix_idx(h, w);
+            auto [r, g, b] = image->rgb(idx);
+            // double intensity = 0.299 * r + 0.587 * g + 0.114 * b;
+            double intensity = (double)(r + g + b) / 3;
+        }
+    }
+}
 
 // Step 1: Identify the three squares
 void identify_squares(const Image& image) {

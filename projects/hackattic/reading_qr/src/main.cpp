@@ -7,18 +7,42 @@ using namespace std;
 using json = nlohmann::json;
 
 struct Image {
-public:
     unsigned char* pixels;
+    unsigned char* grayscale;
     int width;
     int height;
     int channels;
 
-public:
+    // Constructor
+    Image(int width, int height, int channels, unsigned char* pixels) {
+        this->width = width;
+        this->height = height;
+        this->channels = channels;
+        this->pixels = pixels;
+    }
+    ~Image() {
+        if (grayscale) delete[] grayscale;
+    }
+
+    void build_grayscale() {
+        unsigned char* res = new unsigned char[width * height];
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                int idx = pix_idx(h, w);
+                auto [r, g, b] = rgb(idx);
+                // auto intensity = (double)(0.299 * r + 0.587 * g + 0.114 * b);
+                double intensity = (double)(r + g + b) / 3;
+                res[idx] = (unsigned char)intensity;
+            }
+        }
+        this->grayscale = res;
+    }
+
     size_t pix_idx(int h, int w) {
-        return (size_t)(h * width + w) + channels;
+        return (size_t)(h * width + w) * channels;
     }
     pair<int, int> coords(size_t pixel_idx) {
-        size_t pixel_num = pixel_idx / channels;
+        size_t pixel_num = pixel_idx % channels;
         size_t start_h = pixel_num / width, start_w = pixel_num / width;
         return { start_h, start_w };
     }
@@ -61,7 +85,7 @@ void pre_process(Image* image) {
 }
 
 // Step 1: Identify the three squares
-void identify_squares(const Image& image) {
+void identify_squares(Image& image) {
     // bool top_left = false, top_right = false, bottom_left = false;
     // size_t tl_idx, tr_idx, bl_idx;
     bool top_left = false;
@@ -90,7 +114,7 @@ void identify_squares(const Image& image) {
 
     int w = start_w;
     for (; w < image.width; w++) {
-        size_t pix_idx = (size_t)(start_h * image.width + w) * image.channels;
+        size_t pix_idx = image.pix_idx(start_h, w);
         if (!is_black(image, pix_idx)) break;
     }
     pair<size_t, size_t> res;
@@ -104,9 +128,9 @@ void identify_squares(const Image& image) {
 // Read QR code
 void read_qrcode() {
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
-    // bg
-    const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png"; // blank
-    // bg const char* img_path = "/Users/smpl/Desktop/pix2.png"; // has padding
+    // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png"; // blank
+    const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
+    // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
     // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
     // const char* img_path = "/Users/smpl/Desktop/test2.png"; // no padding
     // const char* img_path = "/Users/smpl/Desktop/test3.png"; // color

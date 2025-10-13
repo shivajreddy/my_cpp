@@ -31,8 +31,9 @@ struct Image {
             for (int w = 0; w < width; w++) {
                 int color_idx = pix_idx(h, w);
                 int gray_idx = h * width + w;
-                int intensity = is_black(color_idx) ? 1 : 0;
-                // double intensity = (double)(r + g + b) / 3;
+                // int intensity = is_black(color_idx) ? 1 : 0;
+                auto [r, g, b] = rgb(color_idx);
+                double intensity = (double)(r + g + b) / 3;
                 res[gray_idx] = (unsigned char)intensity;
             }
         }
@@ -72,17 +73,6 @@ struct Image {
 };
 
 // STAGE 1 : PREPROCESSING
-void pre_process(Image* image) {
-    // Grayyscale conversion
-    for (int h = 0; h < image->height; h++) {
-        for (int w = 0; w < image->width; w++) {
-            size_t idx = image->pix_idx(h, w);
-            auto [r, g, b] = image->rgb(idx);
-            // double intensity = 0.299 * r + 0.587 * g + 0.114 * b;
-            double intensity = (double)(r + g + b) / 3;
-        }
-    }
-}
 
 // Step 1: Identify the three squares
 void identify_squares(Image& image) {
@@ -129,8 +119,8 @@ void identify_squares(Image& image) {
 void read_qrcode() {
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png"; // blank
-    const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
-    // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
+    // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
+    const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
     // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
     // const char* img_path = "/Users/smpl/Desktop/test2.png"; // no padding
     // const char* img_path = "/Users/smpl/Desktop/test3.png"; // color

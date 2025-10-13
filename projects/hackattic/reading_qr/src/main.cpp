@@ -6,18 +6,76 @@
 using namespace std;
 using json = nlohmann::json;
 
+struct Image {
+    unsigned char* pixels;
+    int width;
+    int height;
+    int channels;
+};
+
+bool is_black(const Image& image, size_t pix_idx) {
+    int r = image.pixels[pix_idx], b = image.pixels[pix_idx + 1],
+        g = image.pixels[pix_idx + 2];
+    return (r == 0 && b == 0 && g == 0);
+};
+
+bool is_white(const Image& image, size_t pix_idx) {
+    int r = image.pixels[pix_idx], b = image.pixels[pix_idx + 1],
+        g = image.pixels[pix_idx + 2];
+    return (r == 255 && b == 255 && g == 255);
+};
+
+pair<size_t, size_t> top_left_square(const Image& image, size_t idx,
+                                     size_t pad) {
+    printf("finding coords at %zu pad:%zu\n", idx, pad);
+    size_t tl = idx, tr = idx;
+    int w = pad;
+    for (; w < image.width; w++)
+        while (is_black(image, tr++));
+    if (w == image.width) return { -1, -1 };
+    return { tl, tr-- };
+}
+
+// Step 1: Identify the three squares
+void identify_squares(const Image& image) {
+    // bool top_left = false, top_right = false, bottom_left = false;
+    // size_t tl_idx, tr_idx, bl_idx;
+    bool top_left = false;
+    size_t tl_idx, tl_padding;
+    // Finding top-left
+    for (int h = 0; h < image.height; h++) {
+        if (top_left) break;
+        for (int w = 0; w < image.width; w++) {
+            size_t pix_idx = (size_t)(h * image.width + w) * image.channels;
+            if (is_black(image, pix_idx)) {
+                tl_idx = pix_idx;
+                tl_padding = w;
+                top_left = true;
+                break;
+            }
+        }
+    }
+    if (top_left) {
+        auto res = top_left_square(image, tl_idx, tl_padding);
+        cout << res.first << "," << res.second << endl;
+    } else {
+        cout << "Failed to find topleft\n";
+    }
+}
+
 // Read QR code
 void read_qrcode() {
-    const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
+    const char* img_path = "/Users/smpl/Desktop/pix2.png"; // has padding
+    // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
     // const char* img_path = "/Users/smpl/Desktop/test2.png"; // no padding
     // const char* img_path = "/Users/smpl/Desktop/test3.png"; // color
 
     int width, height, channels;
     // image is a 1D array of pixels
-    unsigned char* image = stbi_load(img_path, &width, &height, &channels, 0);
-    if (image == nullptr) exit(1); // failed to load image
-    printf("Image loaded: Width=%d, Height=%d, Channels=%d\n", width, height,
-           channels);
+    unsigned char* pixels = stbi_load(img_path, &width, &height, &channels, 0);
+    if (pixels == nullptr) exit(1); // failed to load image
+    Image image = { pixels, width, height, channels };
+    printf("Image loaded: W=%d, H=%d, Channels=%d\n", width, height, channels);
 
     /*
     h=2 w=2 c=4
@@ -25,23 +83,31 @@ void read_qrcode() {
     */
     // cout << "sizeof(image): " << sizeof(image) << endl;
     // for (auto pixel : image) { cout << pixel << endl; }
-    cout << "h*w: " << height * width << endl; // 69696
-    for (int h = 0; h < height; h++)
+    // cout << "h*w: " << height * width << endl; // 69696
+    int blacks = 0, whites = 0, colors = 0;
+    for (int h = 0; h < height; h++) {
         for (int w = 0; w < width; w++) {
             size_t pixel_idx = (size_t)(h * width + w) * channels;
             // cout << pixel_idx << " : " << image[pixel_idx] << endl;
-            int r = image[pixel_idx];
-            int g = image[pixel_idx + 1];
-            int b = image[pixel_idx + 2];
+            if (is_black(image, pixel_idx))
+                blacks++;
+            else if (is_white(image, pixel_idx))
+                whites++;
+            else
+                colors++;
             if (channels >= 4) {
-                int c = image[pixel_idx + 3];
-                printf("r:%d g:%d b:%d c:%d\n", r, g, b, c);
+                // int c = image[pixel_idx + 3];
+                // printf("r:%d g:%d b:%d c:%d\n", r, g, b, c);
             } else {
-                printf("r:%d g:%d b:%d\n", r, g, b);
+                // printf("r:%d g:%d b:%d\n", r, g, b);
             }
         }
+    }
+    printf("whites:%d blacks:%d colors:%d\n", whites, blacks, colors);
 
-    stbi_image_free(image); // free up the image, closes the fd
+    identify_squares(image);
+
+    stbi_image_free(pixels); // free up the image, closes the fd
 }
 
 int main() {

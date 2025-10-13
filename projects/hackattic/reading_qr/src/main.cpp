@@ -19,6 +19,7 @@ struct Image {
         this->height = height;
         this->channels = channels;
         this->pixels = pixels;
+        build_grayscale();
     }
     ~Image() {
         if (grayscale) delete[] grayscale;
@@ -28,11 +29,11 @@ struct Image {
         unsigned char* res = new unsigned char[width * height];
         for (int h = 0; h < height; h++) {
             for (int w = 0; w < width; w++) {
-                int idx = pix_idx(h, w);
-                auto [r, g, b] = rgb(idx);
-                // auto intensity = (double)(0.299 * r + 0.587 * g + 0.114 * b);
-                double intensity = (double)(r + g + b) / 3;
-                res[idx] = (unsigned char)intensity;
+                int color_idx = pix_idx(h, w);
+                int gray_idx = h * width + w;
+                int intensity = is_black(color_idx) ? 1 : 0;
+                // double intensity = (double)(r + g + b) / 3;
+                res[gray_idx] = (unsigned char)intensity;
             }
         }
         this->grayscale = res;
@@ -51,25 +52,23 @@ struct Image {
     array<int, 3> rgb(size_t pix_idx) {
         return { pixels[pix_idx], pixels[pix_idx + 1], pixels[pix_idx + 2] };
     }
-};
 
-bool is_transparent(const Image& image, size_t pix_idx) {
-    if (image.channels < 4) return false;
-    return image.pixels[pix_idx + 3] == 0;
-}
+    bool is_transparent(size_t pix_idx) {
+        if (this->channels < 4) return false;
+        return this->pixels[pix_idx + 3] == 0;
+    }
 
-bool is_black(const Image& image, size_t pix_idx) {
-    if (is_transparent(image, pix_idx)) return false;
-    int r = image.pixels[pix_idx], g = image.pixels[pix_idx + 1],
-        b = image.pixels[pix_idx + 2];
-    return (r == 0 && g == 0 && b == 0);
-};
+    bool is_black(size_t pix_idx) {
+        if (is_transparent(pix_idx)) return false;
+        auto [r, g, b] = rgb(pix_idx);
+        return (r == 0 && g == 0 && b == 0);
+    };
 
-bool is_white(const Image& image, size_t pix_idx) {
-    if (is_transparent(image, pix_idx)) return false;
-    int r = image.pixels[pix_idx], g = image.pixels[pix_idx + 1],
-        b = image.pixels[pix_idx + 2];
-    return (r == 255 && g == 255 && b == 255);
+    bool is_white(size_t pix_idx) {
+        if (is_transparent(pix_idx)) return false;
+        auto [r, g, b] = rgb(pix_idx);
+        return (r == 255 && g == 255 && b == 255);
+    };
 };
 
 // STAGE 1 : PREPROCESSING
@@ -96,7 +95,7 @@ void identify_squares(Image& image) {
         if (top_left) break;
         for (int w = 0; w < image.width; w++) {
             size_t pix_idx = (size_t)(h * image.width + w) * image.channels;
-            if (is_black(image, pix_idx)) {
+            if (image.is_black(pix_idx)) {
                 tl_idx = pix_idx;
                 top_left = true;
                 break;
@@ -116,7 +115,7 @@ void identify_squares(Image& image) {
     int w = start_w;
     for (; w < image.width; w++) {
         size_t pix_idx = image.pix_idx(start_h, w);
-        if (!is_black(image, pix_idx)) break;
+        if (!image.is_black(pix_idx)) break;
     }
     pair<size_t, size_t> res;
     if (w == image.width)
@@ -137,15 +136,25 @@ void read_qrcode() {
     // const char* img_path = "/Users/smpl/Desktop/test3.png"; // color
 
     int width, height, channels;
-    // image is a 1D array of pixels
     unsigned char* pixels = stbi_load(img_path, &width, &height, &channels, 0);
     if (pixels == nullptr) {
         printf("Failed to load image");
         exit(1);
-    } // failed to load image
+    }
     Image image = Image(width, height, channels, pixels);
     printf("Image loaded: W=%d, H=%d, Channels=%d\n", width, height, channels);
 
+    // identify_squares(image);
+
+    // print grayscale
+    for (int h = 0; h < height; h++) {
+        for (int w = 0; w < width; w++) {
+            cout << (int)image.grayscale[h * width + w] << " ";
+        }
+        cout << endl;
+    }
+
+    /*
     { //
         printf("testing start----------------\n");
         int h = 1;
@@ -171,14 +180,9 @@ void read_qrcode() {
 
         printf("testing end----------------\n");
     }
+    */
 
     /*
-    h=2 w=2 c=4
-    rgba rgba
-    */
-    // cout << "sizeof(image): " << sizeof(image) << endl;
-    // for (auto pixel : image) { cout << pixel << endl; }
-    // cout << "h*w: " << height * width << endl; // 69696
     int blacks = 0, whites = 0, colors = 0;
     int transparent = 0, opaque = 0;
     for (int h = 0; h < height; h++) {
@@ -200,8 +204,7 @@ void read_qrcode() {
     }
     printf("whites:%d blacks:%d colors:%d\n", whites, blacks, colors);
     printf("transparent:%d opaque:%d\n", transparent, opaque);
-
-    identify_squares(image);
+    */
 
     stbi_image_free(pixels); // free up the image, closes the fd
 }

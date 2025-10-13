@@ -42,8 +42,9 @@ struct Image {
         return (size_t)(h * width + w) * channels;
     }
     pair<int, int> coords(size_t pixel_idx) {
-        size_t pixel_num = pixel_idx % channels;
-        size_t start_h = pixel_num / width, start_w = pixel_num / width;
+        size_t pixel_num = pixel_idx / channels;
+        size_t start_h = pixel_num / width;
+        size_t start_w = pixel_num % width;
         return { start_h, start_w };
     }
     // tuple<int, int, int> rgb(size_t pix_idx) {
@@ -142,7 +143,7 @@ void read_qrcode() {
         printf("Failed to load image");
         exit(1);
     } // failed to load image
-    Image image = { pixels, width, height, channels };
+    Image image = Image(width, height, channels, pixels);
     printf("Image loaded: W=%d, H=%d, Channels=%d\n", width, height, channels);
 
     { //

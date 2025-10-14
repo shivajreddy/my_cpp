@@ -25,6 +25,7 @@ struct Image {
         if (grayscale) delete[] grayscale;
     }
 
+    // STAGE 1 : PREPROCESSING
     void build_grayscale() {
         unsigned char* res = new unsigned char[width * height];
         for (int h = 0; h < height; h++) {
@@ -72,7 +73,13 @@ struct Image {
     };
 };
 
-// STAGE 1 : PREPROCESSING
+// STAGE 2: Structural analysis (find the QR pattern)
+void find_qr_pattern(Image* image) {
+    // start with a length = min(h,w) / 3, and keep reducing length to 1
+    // each stage, if image has 3 squares of this length
+    // then further verify the three squares
+    // then get the module(block) size from one of the square
+}
 
 // Step 1: Identify the three squares
 void identify_squares(Image& image) {

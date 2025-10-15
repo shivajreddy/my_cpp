@@ -80,12 +80,22 @@ void find_qr_pattern(Image* image) {
     // then further verify the three squares
     // then get the module(block) size from one of the square
 
-    int h = 1, w = 1;
-
-    for (; h < image->height & w < image->width; h++, w++) {
-        h = ;
-        w = ;
+    int start_h = 1,
+        start_w = 1; // for now i know where the first square starts
+    int h = start_h, w = start_w;
+    bool valid_right_pix = true, valid_down_pix = true;
+    while (true) {
+        if (!valid_right_pix || !valid_down_pix) break;
+        if (h == image->height) break;
+        if (w == image->width) break;
+        size_t right_pixel = image->pix_idx(start_h, w);
+        (!image->is_black(right_pixel)) ? valid_right_pix = false : w++;
+        size_t down_pixel = image->pix_idx(h, start_w);
+        (!image->is_black(down_pixel)) ? valid_down_pix = false : h++;
     }
+
+    if (!valid_down_pix) h--;
+    if (!valid_right_pix) w--;
 }
 
 // Step 1: Identify the three squares

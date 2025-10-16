@@ -83,8 +83,8 @@ void find_qr_pattern(Image* image) {
     int h = 1, w = 1;
 
     for (; h < image->height & w < image->width; h++, w++) {
-        h = ;
-        w = ;
+        // h = ;
+        // w = ;
     }
 }
 
@@ -132,8 +132,8 @@ void identify_squares(Image& image) {
 // Read QR code
 void read_qrcode() {
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
-    const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png"; // blank
-    // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
+    // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png"; // blank
+    const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
     // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
     // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
     // const char* img_path = "/Users/smpl/Desktop/test2.png"; // no padding

@@ -1,10 +1,14 @@
 #include "api.h"
 #include "nlohmann/json.hpp"
+#include <chrono>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 using namespace std;
 using json = nlohmann::json;
+
+// Algorithm Stats
+chrono::time_point<chrono::high_resolution_clock> start_time, end_time;
 
 struct Image {
     int width;
@@ -67,10 +71,15 @@ public:
         return (r == 255 && g == 255 && b == 255);
     };
 
-    // STAGE 1 : PREPROCESSING
 private:
+    /*
+     * STAGE 1 : PREPROCESSING
+     * Build grayscale, using average intensity of rgb
+     * Convert grayscale to binary pixels(0/255) using adaptive thresholding
+     * deconstructor deletes grayscale[] and binary_pixels[]
+     */
     void do_preprocessing() {
-        // 1.1 : Build grayscale
+        // Build grayscale
         this->grayscale = new unsigned char[height * width];
         for (int h = 0; h < height; h++) {
             for (int w = 0; w < width; w++) {
@@ -81,7 +90,7 @@ private:
                 grayscale[g_idx] = (unsigned char)intensity;
             }
         }
-        // 1.2 : Build binary pixels
+        // Build binary pixels
         this->binary_pixels = new unsigned char[height * width];
         const int WINDOW_SIZE = 15;
         const double THRESHOLD_BIAS = 10.0;
@@ -112,8 +121,10 @@ private:
     }
 };
 
-// Read QR code
 void build_image_from_qr() {
+    // START GLOBAL TIME HERE
+    start_time = chrono::high_resolution_clock::now();
+
     const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
     // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
@@ -152,14 +163,9 @@ void build_image_from_qr() {
     stbi_image_free(pixels); // free up the image, closes the fd
 }
 
-int main() {
-    build_image_from_qr();
-    return 0;
-
-    cout << "Reading QR\n";
-
+bool read_input_from_api() {
     // Get the image url
-    cout << "Stage1: Get Data\n";
+    printf("Stage1: Get Data\n");
     string URL;
     URL = "https://hackattic.com/challenges/reading_qr/"
           "problem?access_token=84173d1e3ccdb099";
@@ -172,10 +178,19 @@ int main() {
     string image_url = json_data["image_url"];
     cout << "saving image from image_url: " << image_url << endl;
     save_image(image_url);
+    return 0;
+}
 
-    // Process the Image
-    cout << "Stage2: Process Image\n";
+void send_response_to_api() {
+}
 
-    // Send the response
+int main() {
+    // read_input_from_api();
+    start_time = chrono::high_resolution_clock::now();
+    build_image_from_qr();
+    end_time = chrono::high_resolution_clock::now();
+    auto diff = chrono::duration<double, milli>(end_time - start_time).count();
+    printf("TOTAL TIME: %f ms\n", diff);
+    // send_response_to_api();
     return 0;
 }

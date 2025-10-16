@@ -113,9 +113,9 @@ private:
 };
 
 // Read QR code
-void read_qrcode() {
+void build_image_from_qr() {
     const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
-    // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png"; // blank
+    // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
     // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
     // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
     // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
@@ -153,7 +153,7 @@ void read_qrcode() {
 }
 
 int main() {
-    read_qrcode();
+    build_image_from_qr();
     return 0;
 
     cout << "Reading QR\n";

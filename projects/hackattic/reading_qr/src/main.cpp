@@ -75,7 +75,7 @@ private:
     /*
      * STAGE 1 : PREPROCESSING
      * Build grayscale, using average intensity of rgb
-     * Convert grayscale to binary pixels(0/255) using adaptive thresholding
+     * Build binary pixels(black:0/white:255) using adaptive thresholding
      * deconstructor deletes grayscale[] and binary_pixels[]
      */
     void do_preprocessing() {

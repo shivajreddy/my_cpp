@@ -163,6 +163,75 @@ void build_image_from_qr() {
     stbi_image_free(pixels); // free up the image, closes the fd
 }
 
+// STAGE 2 : Structural Analysis : Pattern Matching
+struct Pattern {
+    int position;
+    float module_size;
+    int count[5];
+};
+vector<Pattern> find_patterns(unsigned char* data, int len) {
+    if (len < 7) return {};
+    vector<Pattern> res;
+
+    int state[5] = { 0, 0, 0, 0, 0 };
+    state[0] = 1;
+    int state_idx = 0;
+    int previous = data[0];
+
+    const int target_state[5] = { 1, 1, 3, 1, 1 };
+    auto state_match = [&]() {
+        int total = 0;
+        for (int i = 0; i < 5; i++) {
+            total += state[i];
+            if (state[i] == 0) return false;
+        }
+        if (total < 7) return false;
+        float mod_size = total / 7.0f;
+        const float TOLERANCE = 0.5f;
+        float max_variance = mod_size * TOLERANCE;
+        return (abs(state[0] - mod_size * 1) < max_variance * 1 &&
+                abs(state[1] - mod_size * 1) < max_variance * 1 &&
+                abs(state[2] - mod_size * 3) < max_variance * 3 &&
+                abs(state[3] - mod_size * 1) < max_variance * 1 &&
+                abs(state[4] - mod_size * 1) < max_variance * 1);
+    };
+
+    auto shift_state = [&]() {
+        for (int i = 1; i < 5; i++) state[i - 1] = state[i];
+        state[4] = 0;
+    };
+
+    auto add_pattern = [&](int idx) {
+        int total = 0;
+        for (auto s : state) total += s;
+        float mod_size = total / 7.0f;
+        int pos = idx - state[4] - state[3] - state[2] / 2;
+        Pattern pattern = { .position = pos, .module_size = mod_size };
+        for (int i = 0; i < 5; i++) pattern.count[i] = state[i];
+        res.push_back(pattern);
+    };
+
+    for (int i = 1; i < len; i++) {
+        int val = data[i];
+        if (val != previous) {
+            state_idx++;
+            if (state_idx == 5) {
+                if (state_match()) add_pattern(i);
+                shift_state();
+                state_idx = 4;
+            }
+            state[state_idx] = 1;
+            previous = val;
+        } else {
+            state[state_idx]++;
+        }
+    }
+
+    if (state_idx == 4 && state_match()) add_pattern(len);
+
+    return res;
+}
+
 bool read_input_from_api() {
     // Get the image url
     printf("Stage1: Get Data\n");

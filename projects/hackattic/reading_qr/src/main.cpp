@@ -121,13 +121,13 @@ private:
     }
 };
 
-void build_image_from_qr() {
+void build_image_from_file() {
     // START GLOBAL TIME HERE
     start_time = chrono::high_resolution_clock::now();
 
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
-    // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
-    const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
+    const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
+    // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
     // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
     // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
     // const char* img_path = "/Users/smpl/Desktop/test2.png"; // no padding
@@ -178,7 +178,6 @@ vector<Pattern> find_patterns(unsigned char* data, int len) {
     int state_idx = 0;
     int previous = data[0];
 
-    const int target_state[5] = { 1, 1, 3, 1, 1 };
     auto state_match = [&]() {
         int total = 0;
         for (int i = 0; i < 5; i++) {
@@ -206,7 +205,9 @@ vector<Pattern> find_patterns(unsigned char* data, int len) {
         for (auto s : state) total += s;
         float mod_size = total / 7.0f;
         int pos = idx - state[4] - state[3] - state[2] / 2;
-        Pattern pattern = { .position = pos, .module_size = mod_size };
+        Pattern pattern;
+        pattern.position = pos;
+        pattern.module_size = mod_size;
         for (int i = 0; i < 5; i++) pattern.count[i] = state[i];
         res.push_back(pattern);
     };
@@ -232,6 +233,21 @@ vector<Pattern> find_patterns(unsigned char* data, int len) {
     return res;
 }
 
+// STAGE 3 : Clustering
+struct Cluster {
+    double x;
+    double y;
+    int count;
+};
+struct Point {
+    double x;
+    double y;
+};
+vector<Cluster> get_cluster() {
+    vector<Cluster> res;
+    return res;
+};
+
 bool read_input_from_api() {
     // Get the image url
     printf("Stage1: Get Data\n");
@@ -256,7 +272,7 @@ void send_response_to_api() {
 int main() {
     // read_input_from_api();
     start_time = chrono::high_resolution_clock::now();
-    build_image_from_qr();
+    build_image_from_file();
     end_time = chrono::high_resolution_clock::now();
     auto diff = chrono::duration<double, milli>(end_time - start_time).count();
     printf("TOTAL TIME: %f ms\n", diff);

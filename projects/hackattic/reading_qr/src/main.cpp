@@ -33,8 +33,10 @@ vector<Pattern> find_patterns(unsigned char* data, int len) {
         }
         if (total < 7) return false;
         float mod_size = total / 7.0f;
-        const float TOLERANCE = 0.5f;
+
+        const float TOLERANCE = 0.75f;
         float max_variance = mod_size * TOLERANCE;
+
         return (abs(state[0] - mod_size * 1) < max_variance * 1 &&
                 abs(state[1] - mod_size * 1) < max_variance * 1 &&
                 abs(state[2] - mod_size * 3) < max_variance * 3 &&
@@ -90,9 +92,8 @@ struct Point {
     double x;
     double y;
 };
-vector<Cluster> get_clusters(vector<Point> points) {
-    const double TOLERANCE = 10.0;
-    const double TOLERANCE_SQR = TOLERANCE * TOLERANCE;
+vector<Cluster> get_clusters(vector<Point> points, double tolerance = 10.0) {
+    const double TOLERANCE_SQR = tolerance * tolerance;
     vector<Cluster> res;
 
     auto get_distance = [](Point p1, Point p2) {
@@ -192,30 +193,41 @@ public:
         vector<Point> candidate_points;
 
         // step 1 : scan all rows horizontally
-        for (int y = 0; y < height; y++) {
-            unsigned char* row = &binary_pixels[y * width];
+        for (int r = 0; r < height; r++) {
+            unsigned char* row = &binary_pixels[r * width];
 
             // find horizontal patterns in the row
             vector<Pattern> h_patterns = find_patterns(row, width);
 
             // step 2: for each horizontal pattern, verify vertically
             for (auto& h_pattern : h_patterns) {
-                int center_x = h_pattern.position;
                 float mod_size = h_pattern.module_size;
 
                 // Extract the column at this x position
-                unsigned char* column = get_column(center_x);
+                unsigned char* column = get_column(h_pattern.position);
 
                 auto v_patterns = find_patterns(column, height);
+                // if (v_patterns.size()) {
+                //     printf("----\n");
+                //     printf("y:%d h_pats.size():%ld\n", r, h_patterns.size());
+                //     printf("y:%d v_pats.size():%ld\n", r, v_patterns.size());
+                // }
+
+                // Use larger tolerance for large images
+                float tolerance = mod_size * 10.0f;
 
                 // Check if any vertical pattern is neare our current y
                 for (auto& v_pattern : v_patterns) {
                     int center_y = v_pattern.position;
+                    // printf("h.pos:%d v.pos:%d\n", h_pattern.position,
+                    //        v_pattern.position);
+                    // printf("center_y: %d l:%d r:%fd\n", center_y,
+                    //        abs(center_y - r), mod_size);
                     // verify: is vertical pattern close to our row?
-                    if (abs(center_y - y) < mod_size * 2) {
+                    if (abs(center_y - r) < tolerance) {
                         // verified, add this point
                         candidate_points.push_back(
-                            { (double)center_x, (double)center_y });
+                            { (double)h_pattern.position, (double)center_y });
                         break;
                     }
                 }
@@ -223,8 +235,11 @@ public:
             }
         }
 
+        printf("Total candidate points: %zu\n", candidate_points.size());
         // Step 3: cluster all candidate points
-        vector<Cluster> clusters = get_clusters(candidate_points);
+        double cluster_tolerance = max(width, height) * 0.05; // 5% of img size
+        vector<Cluster> clusters =
+            get_clusters(candidate_points, cluster_tolerance);
 
         // Step 4: sort by count (confidence) and return top 3
         sort(clusters.begin(), clusters.end(),
@@ -239,7 +254,6 @@ public:
         return finder_patterns;
     }
 
-private:
     /*
      * STAGE 1 : PREPROCESSING
      * Build grayscale, using average intensity of rgb
@@ -294,7 +308,7 @@ void build_image_from_file() {
     start_time = chrono::high_resolution_clock::now();
 
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
-    const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
+    const char* img_path = "/mnt/c/Users/sreddy/Desktop/qr2.png";
     // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
     // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
     // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
@@ -310,7 +324,15 @@ void build_image_from_file() {
     Image image = Image(width, height, channels, pixels);
     printf("Image loaded: W=%d, H=%d, Channels=%d\n", width, height, channels);
 
-    // print grayscale
+    // Detect finder patterns & print them
+    auto patterns = image.detect_patterns();
+
+    /*
+    printf("\nFound %d finder patterns:\n", (int)patterns.size());
+    for (size_t i = 0; i < patterns.size(); i++) {
+        printf("Pattern %zd: position: (%.1f, %.1f), detected %d times\n",
+               i + 1, patterns[i].x, patterns[i].y, patterns[i].count);
+    }
     printf("image.grayscale\n");
     for (int h = 0; h < height; h++) {
         for (int w = 0; w < width; w++) {
@@ -325,14 +347,7 @@ void build_image_from_file() {
         }
         printf("\n");
     }
-
-    // Detect finder patterns & print them
-    auto patterns = image.detect_patterns();
-    printf("\nFound %d finder patterns:\n", (int)patterns.size());
-    for (size_t i = 0; i < patterns.size(); i++) {
-        printf("Pattern %zd: position: (%.1f, %.1f), detected %d times\n",
-               i + 1, patterns[i].x, patterns[i].y, patterns[i].count);
-    }
+     */
 
     stbi_image_free(pixels); // free up the image, closes the fd
 }

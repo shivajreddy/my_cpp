@@ -308,7 +308,7 @@ void build_image_from_file() {
     start_time = chrono::high_resolution_clock::now();
 
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
-    const char* img_path = "/mnt/c/Users/sreddy/Desktop/qr2.png";
+    const char* img_path = "/mnt/c/Users/sreddy/Desktop/qr1.png";
     // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
     // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
     // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding

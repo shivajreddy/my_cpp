@@ -16,6 +16,7 @@ struct Pattern {
     float module_size;
     int count[5];
 };
+
 vector<Pattern> find_patterns(unsigned char* data, int len) {
     if (len < 7) return {};
     vector<Pattern> res;
@@ -308,8 +309,10 @@ void build_image_from_file() {
     start_time = chrono::high_resolution_clock::now();
 
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
-    const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
+    // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
     // const char* img_path = "C:/Users/sredd/Desktop/test2.png";
+    // const char* img_path = "C:/Users/sreddy/Desktop/qr1.png";
+    const char* img_path = "C:/Users/sreddy/Desktop/qr2.png";
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/qr1.png";
     // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
     // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
@@ -330,7 +333,6 @@ void build_image_from_file() {
     // Detect finder patterns & print them
     auto patterns = image.detect_patterns();
 
-    /*
     printf("\nFound %d finder patterns:\n", (int)patterns.size());
     for (size_t i = 0; i < patterns.size(); i++) {
         printf("Pattern %zd: position: (%.1f, %.1f), detected %d times\n",
@@ -350,7 +352,8 @@ void build_image_from_file() {
         }
         printf("\n");
     }
-     */
+    /*
+    */
 
     stbi_image_free(pixels); // free up the image, closes the fd
 }
@@ -377,6 +380,7 @@ void send_response_to_api() {
 }
 
 int main() {
+    printf("hello world!\n");
     // read_input_from_api();
     start_time = chrono::high_resolution_clock::now();
     build_image_from_file();

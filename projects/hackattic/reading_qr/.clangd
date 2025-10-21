@@ -5,6 +5,7 @@ CompileFlags:
     - "-I/Users/smpl/dev/my_cpp/projects/hackattic/mini_miner/include"
     - "-I/home/smpl/dev/my_cpp/projects/hackattic/mini_miner/include"
     - "-Isrc"
+    - "-I${workspaceFolder}/include"
     - "-I/usr/include/curl"
     - "-I/usr/local/opt/openssl@3/include"
     - "-L/usr/local/opt/openssl@3/lib"
@@ -13,9 +14,7 @@ CompileFlags:
     - "-Wall"
     - "-Wextra"
 
-  Checks: >
-    -*,
-    readability-identifier-naming
+  Checks: "-*,readability-identifier-naming"
 
   CheckOptions:
     - key:             readability-identifier-naming.VariableCase

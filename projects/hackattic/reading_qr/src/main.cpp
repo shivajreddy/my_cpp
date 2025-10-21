@@ -17,6 +17,7 @@ struct Pattern {
     int count[5];
 };
 
+<<<<<<< HEAD
 // STAGE 3 : Point Clusters
 struct Point {
     double x;
@@ -29,17 +30,25 @@ struct Cluster {
     int count;
 };
 
+=======
+>>>>>>> refs/remotes/origin/main
 vector<Pattern> find_patterns(unsigned char* data, int len) {
     if (len < 7) return {};
     vector<Pattern> res;
 
     int state[5] = { 0, 0, 0, 0, 0 };
+<<<<<<< HEAD
     int x;
+=======
+>>>>>>> refs/remotes/origin/main
     state[0] = 1;
     int state_idx = 0;
     int previous = data[0];
 
+<<<<<<< HEAD
     // const int target_state[5] = { 1, 1, 3, 1, 1 };
+=======
+>>>>>>> refs/remotes/origin/main
     auto state_match = [&]() {
         int total = 0;
         for (int i = 0; i < 5; i++) {
@@ -48,8 +57,15 @@ vector<Pattern> find_patterns(unsigned char* data, int len) {
         }
         if (total < 7) return false;
         float mod_size = total / 7.0f;
+<<<<<<< HEAD
         const float TOLERANCE = 0.5f;
         float max_variance = mod_size * TOLERANCE;
+=======
+
+        const float TOLERANCE = 0.75f;
+        float max_variance = mod_size * TOLERANCE;
+
+>>>>>>> refs/remotes/origin/main
         return (abs(state[0] - mod_size * 1) < max_variance * 1 &&
                 abs(state[1] - mod_size * 1) < max_variance * 1 &&
                 abs(state[2] - mod_size * 3) < max_variance * 3 &&
@@ -95,9 +111,24 @@ vector<Pattern> find_patterns(unsigned char* data, int len) {
     return res;
 }
 
+<<<<<<< HEAD
 vector<Cluster> get_cluster(vector<Point> points) {
     const double TOLERANCE = 10.0;
     const double TOLERANCE_SQR = TOLERANCE * TOLERANCE;
+=======
+// STAGE 3 : Cluster points
+struct Cluster {
+    double x;
+    double y;
+    int count;
+};
+struct Point {
+    double x;
+    double y;
+};
+vector<Cluster> get_clusters(vector<Point> points, double tolerance = 10.0) {
+    const double TOLERANCE_SQR = tolerance * tolerance;
+>>>>>>> refs/remotes/origin/main
     vector<Cluster> res;
 
     auto get_distance = [](Point p1, Point p2) {
@@ -184,16 +215,24 @@ public:
         return (r == 255 && g == 255 && b == 255);
     };
 
+<<<<<<< HEAD
     // Extract a column from binary_pixels
     unsigned char* getColumn(int x) {
         unsigned char* col = new unsigned char[height];
         for (int y = 0; y < height; y++) {
             col[y] = binary_pixels[y * width + x];
+=======
+    unsigned char* get_column(int x) {
+        unsigned char* col = new unsigned char[height];
+        for (int h = 0; h < height; h++) {
+            col[h] = binary_pixels[h * width + x];
+>>>>>>> refs/remotes/origin/main
         }
         return col;
     }
 
     // Main finder pattern detection
+<<<<<<< HEAD
     vector<Cluster> detectFinderPatterns() {
         vector<Point> candidatePoints;
 
@@ -230,19 +269,74 @@ public:
                 }
 
                 // Clean up
+=======
+    vector<Cluster> detect_patterns() {
+        vector<Point> candidate_points;
+
+        // step 1 : scan all rows horizontally
+        for (int r = 0; r < height; r++) {
+            unsigned char* row = &binary_pixels[r * width];
+
+            // find horizontal patterns in the row
+            vector<Pattern> h_patterns = find_patterns(row, width);
+
+            // step 2: for each horizontal pattern, verify vertically
+            for (auto& h_pattern : h_patterns) {
+                float mod_size = h_pattern.module_size;
+
+                // Extract the column at this x position
+                unsigned char* column = get_column(h_pattern.position);
+
+                auto v_patterns = find_patterns(column, height);
+                // if (v_patterns.size()) {
+                //     printf("----\n");
+                //     printf("y:%d h_pats.size():%ld\n", r, h_patterns.size());
+                //     printf("y:%d v_pats.size():%ld\n", r, v_patterns.size());
+                // }
+
+                // Use larger tolerance for large images
+                float tolerance = mod_size * 10.0f;
+
+                // Check if any vertical pattern is neare our current y
+                for (auto& v_pattern : v_patterns) {
+                    int center_y = v_pattern.position;
+                    // printf("h.pos:%d v.pos:%d\n", h_pattern.position,
+                    //        v_pattern.position);
+                    // printf("center_y: %d l:%d r:%fd\n", center_y,
+                    //        abs(center_y - r), mod_size);
+                    // verify: is vertical pattern close to our row?
+                    if (abs(center_y - r) < tolerance) {
+                        // verified, add this point
+                        candidate_points.push_back(
+                            { (double)h_pattern.position, (double)center_y });
+                        break;
+                    }
+                }
+>>>>>>> refs/remotes/origin/main
                 delete[] column;
             }
         }
 
+<<<<<<< HEAD
         // Step 3: Cluster all candidate points
         vector<Cluster> clusters = get_cluster(candidatePoints);
 
         // Step 4: Sort by count (confidence) and return top 3
+=======
+        printf("Total candidate points: %zu\n", candidate_points.size());
+        // Step 3: cluster all candidate points
+        double cluster_tolerance = max(width, height) * 0.05; // 5% of img size
+        vector<Cluster> clusters =
+            get_clusters(candidate_points, cluster_tolerance);
+
+        // Step 4: sort by count (confidence) and return top 3
+>>>>>>> refs/remotes/origin/main
         sort(clusters.begin(), clusters.end(),
              [](const Cluster& a, const Cluster& b) {
                  return a.count > b.count;
              });
 
+<<<<<<< HEAD
         vector<Cluster> finderPatterns;
         int numPatterns = min(3, (int)clusters.size());
         for (int i = 0; i < numPatterns; i++) {
@@ -253,6 +347,15 @@ public:
     }
 
 private:
+=======
+        vector<Cluster> finder_patterns;
+        int num_patterns = min(3, (int)clusters.size());
+        for (int i = 0; i < num_patterns; i++)
+            finder_patterns.push_back(clusters[i]);
+        return finder_patterns;
+    }
+
+>>>>>>> refs/remotes/origin/main
     /*
      * STAGE 1 : PREPROCESSING
      * Build grayscale, using average intensity of rgb
@@ -302,12 +405,19 @@ private:
     }
 };
 
-void build_image_from_qr() {
+void build_image_from_file() {
     // START GLOBAL TIME HERE
     start_time = chrono::high_resolution_clock::now();
 
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
+<<<<<<< HEAD
+=======
+    // const char* img_path = "C:/Users/sredd/Desktop/test2.png";
+    // const char* img_path = "C:/Users/sreddy/Desktop/qr1.png";
+    const char* img_path = "C:/Users/sreddy/Desktop/qr2.png";
+    // const char* img_path = "/mnt/c/Users/sreddy/Desktop/qr1.png";
+>>>>>>> refs/remotes/origin/main
     // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
     // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
     // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
@@ -317,12 +427,18 @@ void build_image_from_qr() {
     int width, height, channels;
     unsigned char* pixels = stbi_load(img_path, &width, &height, &channels, 0);
     if (pixels == nullptr) {
+<<<<<<< HEAD
         printf("Failed to load image\n");
+=======
+        fprintf(stderr, "%s:%d: Failed to load image: %s\n", __FILE__, __LINE__,
+                img_path);
+>>>>>>> refs/remotes/origin/main
         exit(1);
     }
     Image image = Image(width, height, channels, pixels);
     printf("Image loaded: W=%d, H=%d, Channels=%d\n", width, height, channels);
 
+<<<<<<< HEAD
     // Detect finder patterns
     vector<Cluster> patterns = image.detectFinderPatterns();
 
@@ -330,12 +446,40 @@ void build_image_from_qr() {
     for (size_t i = 0; i < patterns.size(); i++) {
         printf("Pattern %zu: position (%.1f, %.1f), detected %d times\n", i + 1,
                patterns[i].x, patterns[i].y, patterns[i].count);
+=======
+    // Detect finder patterns & print them
+    auto patterns = image.detect_patterns();
+
+    printf("\nFound %d finder patterns:\n", (int)patterns.size());
+    for (size_t i = 0; i < patterns.size(); i++) {
+        printf("Pattern %zd: position: (%.1f, %.1f), detected %d times\n",
+               i + 1, patterns[i].x, patterns[i].y, patterns[i].count);
     }
+    printf("image.grayscale\n");
+    for (int h = 0; h < height; h++) {
+        for (int w = 0; w < width; w++) {
+            printf("%3d ", (int)image.grayscale[image.gray_idx(h, w)]);
+        }
+        printf("\n");
+    }
+    printf("image.binary_pixels\n");
+    for (int h = 0; h < height; h++) {
+        for (int w = 0; w < width; w++) {
+            printf("%3d ", (int)image.binary_pixels[image.gray_idx(h, w)]);
+        }
+        printf("\n");
+>>>>>>> refs/remotes/origin/main
+    }
+    /*
+    */
 
     stbi_image_free(pixels); // free up the image, closes the fd
 }
 
+<<<<<<< HEAD
 // GET INPUT FOR PROBLEM
+=======
+>>>>>>> refs/remotes/origin/main
 bool read_input_from_api() {
     // Get the image url
     printf("Stage1: Get Data\n");
@@ -359,9 +503,10 @@ void send_response_to_api() {
 }
 
 int main() {
+    printf("hello world!\n");
     // read_input_from_api();
     start_time = chrono::high_resolution_clock::now();
-    build_image_from_qr();
+    build_image_from_file();
     end_time = chrono::high_resolution_clock::now();
     auto diff = chrono::duration<double, milli>(end_time - start_time).count();
     printf("TOTAL TIME: %f ms\n", diff);

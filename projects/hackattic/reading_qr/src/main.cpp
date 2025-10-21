@@ -126,8 +126,9 @@ void build_image_from_qr() {
     start_time = chrono::high_resolution_clock::now();
 
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
-    // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
-    const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
+    const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
+    // const char* img_path = "C:/Users/sredd/Desktop/test2.png";
+    // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
     // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
     // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
     // const char* img_path = "/Users/smpl/Desktop/test2.png"; // no padding
@@ -136,7 +137,8 @@ void build_image_from_qr() {
     int width, height, channels;
     unsigned char* pixels = stbi_load(img_path, &width, &height, &channels, 0);
     if (pixels == nullptr) {
-        printf("Failed to load image");
+        fprintf(stderr, "%s:%d: Failed to load image: %s\n", __FILE__, __LINE__,
+                img_path);
         exit(1);
     }
     Image image = Image(width, height, channels, pixels);

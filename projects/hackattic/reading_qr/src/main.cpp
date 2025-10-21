@@ -10,6 +10,119 @@ using json = nlohmann::json;
 // Algorithm Stats
 chrono::time_point<chrono::high_resolution_clock> start_time, end_time;
 
+// STAGE 2 : Structural Analysis : Pattern Matching
+struct Pattern {
+    int position;
+    float module_size;
+    int count[5];
+};
+
+// STAGE 3 : Point Clusters
+struct Point {
+    double x;
+    double y;
+};
+
+struct Cluster {
+    double x;
+    double y;
+    int count;
+};
+
+vector<Pattern> find_patterns(unsigned char* data, int len) {
+    if (len < 7) return {};
+    vector<Pattern> res;
+
+    int state[5] = { 0, 0, 0, 0, 0 };
+    int x;
+    state[0] = 1;
+    int state_idx = 0;
+    int previous = data[0];
+
+    // const int target_state[5] = { 1, 1, 3, 1, 1 };
+    auto state_match = [&]() {
+        int total = 0;
+        for (int i = 0; i < 5; i++) {
+            total += state[i];
+            if (state[i] == 0) return false;
+        }
+        if (total < 7) return false;
+        float mod_size = total / 7.0f;
+        const float TOLERANCE = 0.5f;
+        float max_variance = mod_size * TOLERANCE;
+        return (abs(state[0] - mod_size * 1) < max_variance * 1 &&
+                abs(state[1] - mod_size * 1) < max_variance * 1 &&
+                abs(state[2] - mod_size * 3) < max_variance * 3 &&
+                abs(state[3] - mod_size * 1) < max_variance * 1 &&
+                abs(state[4] - mod_size * 1) < max_variance * 1);
+    };
+
+    auto shift_state = [&]() {
+        for (int i = 1; i < 5; i++) state[i - 1] = state[i];
+        state[4] = 0;
+    };
+
+    auto add_pattern = [&](int idx) {
+        int total = 0;
+        for (auto s : state) total += s;
+        float mod_size = total / 7.0f;
+        int pos = idx - state[4] - state[3] - state[2] / 2;
+        Pattern pattern;
+        pattern.position = pos;
+        pattern.module_size = mod_size;
+        for (int i = 0; i < 5; i++) pattern.count[i] = state[i];
+        res.push_back(pattern);
+    };
+
+    for (int i = 1; i < len; i++) {
+        int val = data[i];
+        if (val != previous) {
+            state_idx++;
+            if (state_idx == 5) {
+                if (state_match()) add_pattern(i);
+                shift_state();
+                state_idx = 4;
+            }
+            state[state_idx] = 1;
+            previous = val;
+        } else {
+            state[state_idx]++;
+        }
+    }
+
+    if (state_idx == 4 && state_match()) add_pattern(len);
+
+    return res;
+}
+
+vector<Cluster> get_cluster(vector<Point> points) {
+    const double TOLERANCE = 10.0;
+    const double TOLERANCE_SQR = TOLERANCE * TOLERANCE;
+    vector<Cluster> res;
+
+    auto get_distance = [](Point p1, Point p2) {
+        double dx = p1.x - p2.x;
+        double dy = p1.y - p2.y;
+        return (dx * dx + dy * dy);
+    };
+
+    for (auto& point : points) {
+        bool found = false;
+        for (auto& clst : res) {
+            double dist = get_distance(point, { clst.x, clst.y });
+            if (dist < TOLERANCE_SQR) {
+                clst.x = (clst.x * clst.count + point.x) / (clst.count + 1);
+                clst.y = (clst.y * clst.count + point.y) / (clst.count + 1);
+                clst.count++;
+                found = true;
+                break;
+            }
+        }
+        if (!found) res.push_back({ point.x, point.y, 1 });
+    }
+    return res;
+}
+
 struct Image {
     int width;
     int height;
@@ -71,6 +184,74 @@ public:
         return (r == 255 && g == 255 && b == 255);
     };
 
+    // Extract a column from binary_pixels
+    unsigned char* getColumn(int x) {
+        unsigned char* col = new unsigned char[height];
+        for (int y = 0; y < height; y++) {
+            col[y] = binary_pixels[y * width + x];
+        }
+        return col;
+    }
+
+    // Main finder pattern detection
+    vector<Cluster> detectFinderPatterns() {
+        vector<Point> candidatePoints;
+
+        // Step 1: Scan all rows horizontally
+        for (int y = 0; y < height; y++) {
+            // Get pointer to this row in binary_pixels
+            unsigned char* row = &binary_pixels[y * width];
+
+            // Find horizontal patterns in this row
+            vector<Pattern> hPatterns = find_patterns(row, width);
+
+            // Step 2: For each horizontal pattern, verify vertically
+            for (auto& hPattern : hPatterns) {
+                int centerX = hPattern.position;
+                float moduleSize = hPattern.module_size;
+
+                // Extract the column at this x position
+                unsigned char* column = getColumn(centerX);
+
+                // Find patterns in this column
+                vector<Pattern> vPatterns = find_patterns(column, height);
+
+                // Check if any vertical pattern is near our current y
+                for (auto& vPattern : vPatterns) {
+                    int centerY = vPattern.position;
+
+                    // Verify: is vertical pattern close to our row?
+                    if (abs(centerY - y) < moduleSize * 2) {
+                        // Verified! Add this point
+                        candidatePoints.push_back(
+                            { (double)centerX, (double)centerY });
+                        break;
+                    }
+                }
+
+                // Clean up
+                delete[] column;
+            }
+        }
+
+        // Step 3: Cluster all candidate points
+        vector<Cluster> clusters = get_cluster(candidatePoints);
+
+        // Step 4: Sort by count (confidence) and return top 3
+        sort(clusters.begin(), clusters.end(),
+             [](const Cluster& a, const Cluster& b) {
+                 return a.count > b.count;
+             });
+
+        vector<Cluster> finderPatterns;
+        int numPatterns = min(3, (int)clusters.size());
+        for (int i = 0; i < numPatterns; i++) {
+            finderPatterns.push_back(clusters[i]);
+        }
+
+        return finderPatterns;
+    }
+
 private:
     /*
      * STAGE 1 : PREPROCESSING
@@ -127,111 +308,34 @@ void build_image_from_qr() {
 
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test1.png"; // white
     // const char* img_path = "/mnt/c/Users/sreddy/Desktop/test2.png";
-    const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
+    // const char* img_path = "/Users/smpl/Desktop/pix1.png"; // blank
     // const char* img_path = "/Users/smpl/Desktop/pix2.png"; // white
     // const char* img_path = "/Users/smpl/Desktop/test.png"; // has padding
-    // const char* img_path = "/Users/smpl/Desktop/test2.png"; // no padding
+    const char* img_path = "/Users/smpl/Desktop/test2.png"; // no padding
     // const char* img_path = "/Users/smpl/Desktop/test3.png"; // color
 
     int width, height, channels;
     unsigned char* pixels = stbi_load(img_path, &width, &height, &channels, 0);
     if (pixels == nullptr) {
-        printf("Failed to load image");
+        printf("Failed to load image\n");
         exit(1);
     }
     Image image = Image(width, height, channels, pixels);
     printf("Image loaded: W=%d, H=%d, Channels=%d\n", width, height, channels);
 
-    // identify_squares(image);
+    // Detect finder patterns
+    vector<Cluster> patterns = image.detectFinderPatterns();
 
-    // print grayscale
-    printf("image.grayscale\n");
-    for (int h = 0; h < height; h++) {
-        for (int w = 0; w < width; w++) {
-            printf("%3d ", (int)image.grayscale[image.gray_idx(h, w)]);
-        }
-        printf("\n");
-    }
-    printf("image.binary_pixels\n");
-    for (int h = 0; h < height; h++) {
-        for (int w = 0; w < width; w++) {
-            printf("%3d ", (int)image.binary_pixels[image.gray_idx(h, w)]);
-        }
-        printf("\n");
+    printf("\nFound %d finder patterns:\n", (int)patterns.size());
+    for (size_t i = 0; i < patterns.size(); i++) {
+        printf("Pattern %zu: position (%.1f, %.1f), detected %d times\n", i + 1,
+               patterns[i].x, patterns[i].y, patterns[i].count);
     }
 
     stbi_image_free(pixels); // free up the image, closes the fd
 }
 
-// STAGE 2 : Structural Analysis : Pattern Matching
-struct Pattern {
-    int position;
-    float module_size;
-    int count[5];
-};
-vector<Pattern> find_patterns(unsigned char* data, int len) {
-    if (len < 7) return {};
-    vector<Pattern> res;
-
-    int state[5] = { 0, 0, 0, 0, 0 };
-    state[0] = 1;
-    int state_idx = 0;
-    int previous = data[0];
-
-    const int target_state[5] = { 1, 1, 3, 1, 1 };
-    auto state_match = [&]() {
-        int total = 0;
-        for (int i = 0; i < 5; i++) {
-            total += state[i];
-            if (state[i] == 0) return false;
-        }
-        if (total < 7) return false;
-        float mod_size = total / 7.0f;
-        const float TOLERANCE = 0.5f;
-        float max_variance = mod_size * TOLERANCE;
-        return (abs(state[0] - mod_size * 1) < max_variance * 1 &&
-                abs(state[1] - mod_size * 1) < max_variance * 1 &&
-                abs(state[2] - mod_size * 3) < max_variance * 3 &&
-                abs(state[3] - mod_size * 1) < max_variance * 1 &&
-                abs(state[4] - mod_size * 1) < max_variance * 1);
-    };
-
-    auto shift_state = [&]() {
-        for (int i = 1; i < 5; i++) state[i - 1] = state[i];
-        state[4] = 0;
-    };
-
-    auto add_pattern = [&](int idx) {
-        int total = 0;
-        for (auto s : state) total += s;
-        float mod_size = total / 7.0f;
-        int pos = idx - state[4] - state[3] - state[2] / 2;
-        Pattern pattern = { .position = pos, .module_size = mod_size };
-        for (int i = 0; i < 5; i++) pattern.count[i] = state[i];
-        res.push_back(pattern);
-    };
-
-    for (int i = 1; i < len; i++) {
-        int val = data[i];
-        if (val != previous) {
-            state_idx++;
-            if (state_idx == 5) {
-                if (state_match()) add_pattern(i);
-                shift_state();
-                state_idx = 4;
-            }
-            state[state_idx] = 1;
-            previous = val;
-        } else {
-            state[state_idx]++;
-        }
-    }
-
-    if (state_idx == 4 && state_match()) add_pattern(len);
-
-    return res;
-}
-
+// GET INPUT FOR PROBLEM
 bool read_input_from_api() {
     // Get the image url
     printf("Stage1: Get Data\n");
@@ -250,6 +354,7 @@ bool read_input_from_api() {
     return 0;
 }
 
+// SEND SOLUTION
 void send_response_to_api() {
 }
 
